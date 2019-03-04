@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+    
+
+    
+
+    
+
+
+
+    <meta charset="utf-8">
+    
+    
+    
+    
+    <title>ReentrantLock(重入锁)以及公平性 | 小笔记本 | 好风凭借力，送我上青云</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    <meta name="theme-color" content="#3F51B5">
+    
+    
+    <meta name="keywords" content="concurrent,synchronize">
+    <meta name="description" content="简介ReentrantLock的实现可以替代隐式的synchronized关键字，而且能够提供超过关键字本身的多种功能。这里有一个锁获取的公平性问题，如果在绝对时间上，先对锁进行获取的请求一定先被满足，那么这个锁就是公平的，反之，是不公平的，也就是说等待时间最长的线程最有机会获取锁，也可以说锁的获取是有序的。ReentrantLock提供了一个构造函数，能够控制这个锁是否公平。而锁的名字也是说明了">
+<meta name="keywords" content="concurrent,synchronize">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ReentrantLock(重入锁)以及公平性">
+<meta property="og:url" content="https://fibbery.github.io/2018/01/03/ReentrantLock(重入锁)以及公平性/index.html">
+<meta property="og:site_name" content="小笔记本">
+<meta property="og:description" content="简介ReentrantLock的实现可以替代隐式的synchronized关键字，而且能够提供超过关键字本身的多种功能。这里有一个锁获取的公平性问题，如果在绝对时间上，先对锁进行获取的请求一定先被满足，那么这个锁就是公平的，反之，是不公平的，也就是说等待时间最长的线程最有机会获取锁，也可以说锁的获取是有序的。ReentrantLock提供了一个构造函数，能够控制这个锁是否公平。而锁的名字也是说明了">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://fibbery.github.io/assets/blogImg/reentranlock-img01.png">
+<meta property="og:updated_time" content="2019-03-04T01:55:25.542Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="ReentrantLock(重入锁)以及公平性">
+<meta name="twitter:description" content="简介ReentrantLock的实现可以替代隐式的synchronized关键字，而且能够提供超过关键字本身的多种功能。这里有一个锁获取的公平性问题，如果在绝对时间上，先对锁进行获取的请求一定先被满足，那么这个锁就是公平的，反之，是不公平的，也就是说等待时间最长的线程最有机会获取锁，也可以说锁的获取是有序的。ReentrantLock提供了一个构造函数，能够控制这个锁是否公平。而锁的名字也是说明了">
+<meta name="twitter:image" content="https://fibbery.github.io/assets/blogImg/reentranlock-img01.png">
+    
+        <link rel="alternate" type="application/atom+xml" title="小笔记本" href="/atom.xml">
+    
+    <link rel="shortcut icon" href="/img/favicon.ico">
+    <link rel="stylesheet" href="//unpkg.com/hexo-theme-material-indigo@latest/css/style.css">
+    <script>window.lazyScripts=[]</script>
+
+    <!-- custom head -->
+    
+
+</head>
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide">
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap" style="background-image:url(/)">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.jpg">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">Fibbery</h5>
+          <a href="mailto:568263091@qq.com" title="568263091@qq.com" class="mail">568263091@qq.com</a>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/">
+                <i class="icon icon-lg icon-home"></i>
+                主页
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/archives">
+                <i class="icon icon-lg icon-archives"></i>
+                Archives
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags">
+                <i class="icon icon-lg icon-tags"></i>
+                Tags
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories">
+                <i class="icon icon-lg icon-th-list"></i>
+                Categories
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/fibbery" target="_blank">
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">ReentrantLock(重入锁)以及公平性</div>
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="検索">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menuShare">
+            <i class="icon icon-lg icon-share-alt"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+
+    <div class="container fade-scale">
+        <h1 class="title">ReentrantLock(重入锁)以及公平性</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2018-01-03T12:15:00.000Z" itemprop="datePublished" class="page-time">
+  2018-01-03
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/java/">java</a></li></ul>
+
+            
+        </h5>
+    </div>
+
+    
+
+
+</header>
+
+
+<div class="container body-wrap">
+    
+    <aside class="post-widget">
+        <nav class="post-toc-wrap post-toc-shrink" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#简介"><span class="post-toc-number">1.</span> <span class="post-toc-text">简介</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#实现分析"><span class="post-toc-number">2.</span> <span class="post-toc-text">实现分析</span></a></li></ol>
+        </nav>
+    </aside>
+
+
+<article id="post-ReentrantLock(重入锁)以及公平性" class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">ReentrantLock(重入锁)以及公平性</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2018-01-03 20:15:00" datetime="2018-01-03T12:15:00.000Z" itemprop="datePublished">2018-01-03</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/java/">java</a></li></ul>
+
+
+
+            
+<span id="busuanzi_container_page_pv" title="文章总阅读量" style="display:none">
+    <i class="icon icon-eye icon-pr"></i><span id="busuanzi_value_page_pv"></span>
+</span>
+
+
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>ReentrantLock的实现可以替代隐式的synchronized关键字，而且能够提供超过关键字本身的多种功能。<br>这里有一个锁获取的公平性问题，如果在绝对时间上，先对锁进行获取的请求一定先被满足，那么这个锁就是公平的，反之，是不公平的，也就是说等待时间最长的线程最有机会获取锁，也可以说锁的获取是有序的。ReentrantLock提供了一个构造函数，能够控制这个锁是否公平。而锁的名字也是说明了这个锁具备重复进入的可能，也就是说能让当前线程多次的进行对锁的获取操作，这样的最大次数是限制是Integer.MAX_VALUE,约21次左右。<br>事实上公平的锁机制没有非公平的效率高，因为公平的获取锁没有考虑到操作系统对线程的调度因素，这样造成JVM对于等待中的线程调度次序和操作系统对线程的调度之间的不匹配。对于锁的快速且重复获取过程中，连续获取的概率是非常高的，而公平锁会压制这种情况，虽然公平性得以保障，但是响应比却下降了。</p>
+<a id="more"></a>
+<h2 id="实现分析"><a href="#实现分析" class="headerlink" title="实现分析"></a>实现分析</h2><p>代码结构如下：<br><figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="/assets/blogImg/reentranlock-img01.png" alt="代码结构" title>
+                </div>
+                <div class="image-caption">代码结构</div>
+            </figure></p>
+<p>ReentrantLock持有一个Sync对象,该对象实现了AbstractQueuedSynchronizer，而Sync有两个具化实现类FairSync和NonfairSync。<br>Sync(AbstractQueueSynchronizer)中持有两个Node对象tail和head来维持一张等待线程的链表。</p>
+<p>FairSync和NonfairSync的具体区别点在于：</p>
+<ol>
+<li>lock的时候,FairSync直接调用的acquire(1),当前线程直接进入等待链表中，而NonfairSync则是优先通过compareAndSetState尝试去获取一次锁(修改当前锁的状态)，如果成功则直接拿到锁，不成功则调用acquire(1)进入等待队列。</li>
+<li>tryAcquire时候，FairSync先通过判断前面没有等待线程的时候在进行尝试获取锁，而NonfairSync直接就尝试获取。FairSync执行的顺序完全安装等待队列中的顺序执行，而NonfairSync则是打破这种规则先直接获取，获取的到就可以，获取不到才进入等待队列。</li>
+</ol>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    
+    <div class="content">
+        
+<span class="post-time">
+    最終更新：<time datetime="2019-03-04T01:55:25.542Z" itemprop="dateUpdated">2019-03-04 09:55:25</time>
+</span><br>
+
+
+        
+        这里可以写作者留言，标签和 hexo 中所有变量及辅助函数等均可调用，示例：<a href="/2018/01/03/ReentrantLock(重入锁)以及公平性/" target="_blank" rel="external">https://fibbery.github.io/2018/01/03/ReentrantLock(重入锁)以及公平性/</a>
+        
+    </div>
+    
+    <footer>
+        <a href="https://fibbery.github.io">
+            <img src="/img/avatar.jpg" alt="Fibbery">
+            Fibbery
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/concurrent/">concurrent</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/synchronize/">synchronize</a></li></ul>
+
+
+            
+<div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://fibbery.github.io/2018/01/03/ReentrantLock(重入锁)以及公平性/&title=《ReentrantLock(重入锁)以及公平性》 — 小笔记本&pic=https://fibbery.github.io/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://fibbery.github.io/2018/01/03/ReentrantLock(重入锁)以及公平性/&title=《ReentrantLock(重入锁)以及公平性》 — 小笔记本&source=简介ReentrantLock的实现可以替代隐式的synchronized关键字，而且能够提供超过关键字本身的多种功能。这里有一个锁获取的公平性问题，如果..." data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://fibbery.github.io/2018/01/03/ReentrantLock(重入锁)以及公平性/" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《ReentrantLock(重入锁)以及公平性》 — 小笔记本&url=https://fibbery.github.io/2018/01/03/ReentrantLock(重入锁)以及公平性/&via=https://fibbery.github.io" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://fibbery.github.io/2018/01/03/ReentrantLock(重入锁)以及公平性/" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/2018/01/03/ArrayDeque中allocateElements解析/" id="post-prev" class="post-nav-link">
+        <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
+        <h4 class="title">ArrayDeque中allocateElements解析</h4>
+      </a>
+    </div>
+  
+
+  
+</nav>
+
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        
+<p>
+    <span id="busuanzi_container_site_uv" style="display:none">
+        站点总访客数：<span id="busuanzi_value_site_uv"></span>
+    </span>
+    <span id="busuanzi_container_site_pv" style="display:none">
+        站点总访问量：<span id="busuanzi_value_site_pv"></span>
+    </span>
+</p>
+
+
+        <p>
+            
+                <span><a href="/atom.xml" target="_blank" class="rss" title="rss"><i class="icon icon-lg icon-rss"></i></a></span>
+            
+            <span>このブログの内容物は<a rel="license" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.ja">クリエイティブ・コモンズ 表示 - 非営利 - 継承 4.0 国際ライセンスの下に提供されています</a></span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p><span>Fibbery &copy; 2015 - 2019</span>
+            <span>
+                
+                Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/yscoder/hexo-theme-indigo" target="_blank">indigo</a>
+            </span>
+        </p>
+    </div>
+</footer>
+
+    </main>
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://fibbery.github.io/2018/01/03/ReentrantLock(重入锁)以及公平性/&title=《ReentrantLock(重入锁)以及公平性》 — 小笔记本&pic=https://fibbery.github.io/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://fibbery.github.io/2018/01/03/ReentrantLock(重入锁)以及公平性/&title=《ReentrantLock(重入锁)以及公平性》 — 小笔记本&source=简介ReentrantLock的实现可以替代隐式的synchronized关键字，而且能够提供超过关键字本身的多种功能。这里有一个锁获取的公平性问题，如果..." data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://fibbery.github.io/2018/01/03/ReentrantLock(重入锁)以及公平性/" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《ReentrantLock(重入锁)以及公平性》 — 小笔记本&url=https://fibbery.github.io/2018/01/03/ReentrantLock(重入锁)以及公平性/&via=https://fibbery.github.io" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://fibbery.github.io/2018/01/03/ReentrantLock(重入锁)以及公平性/" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAN4AAADeCAAAAAB3DOFrAAACuElEQVR42u3awW7jMAwE0P7/T+9ed9HGmSElNIeXk1G0sp4DmOxQX1/x588/n+ff+X79vFryV8ndVx88PDy8xdafb/y8oe+3f7VC8gie10/2jIeHh3ebN1v6GfbmxnERaksIHh4e3ufz9v3t2eYbDw8P75N5SSPeXrcr4+Hh4f0Wr10ub6mTcpKUiutZCx4eHl7My1vhz7m+Mt/Dw8PDW0/V28hg8xLfrPByZTw8PLwLvHaE/wxujyC0w7N2n3h4eHg3eMNgdBEiJA8rfzRvigoeHh7eBV5UN0ahQF5CZhsdhrZ4eHh4h3izoCFvlGdjsPYA1pv5Hh4eHt5lXv7ibt/GOXU2kBt+P3h4eHiLmXs+ptqPxGZ3Xx29wsPDw1vz2gKQD66S8X9eMGZhMR4eHt4N3iZa3ccNs5hjGOni4eHhHeXNmtd2YNZ298kKUbOOh4eHd5S3PwRwalS2P5j1AxIPDw/vAm8z7qoT4tEhgLZZX/2vgIeHh3c059yPrGYr5EcH6kgCDw8P7xBvRs2Tj3pbo/b9ZeKCh4eHd5SXLzRj1BO5UZiLh4eHd5uXBKx5iJBvcdbx1l8DHh4e3jVecnxqFhlsYo5NM/1fYcDDw8M7ypst1L7u8yMF7bAt3wkeHh7ePV5+QGrTWLfBbvuYhmMwPDw8vJjXNsfJdY7PA5HZ48PDw8O7x5u9dltwG3kkjfWx02R4eHh4JS8PWDex7z4UrmMUPDw8vKO82e3bw1Kz2Lc9kPrD+nh4eHgXeO2rNo9WT229vV5VEjw8PLxynr4fzyfNcT7iSsZv0d3x8PDwrvHy0CEvHvnP8wJTD/Dw8PDwPoa3KRX7Hr8oWnh4eHgfwMvHY7ON5sdko+EZHh4e3jVeEka0w7A8/M1DjTakwMPDw7vB27y+N2Oq5GGdKj94eHh4h3h/AcK8sCUiq8g0AAAAAElFTkSuQmCC" alt="微信分享二维码">
+</div>
+
+
+
+
+    <script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>
+<script>
+var BLOG = { ROOT: '/', SHARE: true, REWARD: false };
+
+
+</script>
+
+<script src="//unpkg.com/hexo-theme-material-indigo@latest/js/main.min.js"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script src="//unpkg.com/hexo-theme-material-indigo@latest/js/search.min.js" async></script>
+
+
+
+
+
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+<script>
+(function() {
+    var OriginTitile = document.title, titleTime;
+    document.addEventListener('visibilitychange', function() {
+        if (document.hidden) {
+            document.title = '死鬼去哪里了！';
+            clearTimeout(titleTime);
+        } else {
+            document.title = '(つェ⊂)咦!又好了!';
+            titleTime = setTimeout(function() {
+                document.title = OriginTitile;
+            },2000);
+        }
+    });
+})();
+</script>
+
+
+
+</body>
+</html>

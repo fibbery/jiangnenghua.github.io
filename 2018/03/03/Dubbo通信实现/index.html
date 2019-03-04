@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+    
+
+    
+
+    
+
+
+
+    <meta charset="utf-8">
+    
+    
+    
+    
+    <title>Dubbo通信实现 | 小笔记本 | 好风凭借力，送我上青云</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    <meta name="theme-color" content="#3F51B5">
+    
+    
+    <meta name="keywords" content="dubbo,netty">
+    <meta name="description" content="前提基于dubbo默认通讯服务器Netty来解析服务端和客户端如何通讯">
+<meta name="keywords" content="dubbo,netty">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Dubbo通信实现">
+<meta property="og:url" content="https://fibbery.github.io/2018/03/03/Dubbo通信实现/index.html">
+<meta property="og:site_name" content="小笔记本">
+<meta property="og:description" content="前提基于dubbo默认通讯服务器Netty来解析服务端和客户端如何通讯">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2019-03-04T01:55:25.542Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Dubbo通信实现">
+<meta name="twitter:description" content="前提基于dubbo默认通讯服务器Netty来解析服务端和客户端如何通讯">
+    
+        <link rel="alternate" type="application/atom+xml" title="小笔记本" href="/atom.xml">
+    
+    <link rel="shortcut icon" href="/img/favicon.ico">
+    <link rel="stylesheet" href="//unpkg.com/hexo-theme-material-indigo@latest/css/style.css">
+    <script>window.lazyScripts=[]</script>
+
+    <!-- custom head -->
+    
+
+</head>
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide">
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap" style="background-image:url(/)">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.jpg">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">Fibbery</h5>
+          <a href="mailto:568263091@qq.com" title="568263091@qq.com" class="mail">568263091@qq.com</a>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/">
+                <i class="icon icon-lg icon-home"></i>
+                主页
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/archives">
+                <i class="icon icon-lg icon-archives"></i>
+                Archives
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags">
+                <i class="icon icon-lg icon-tags"></i>
+                Tags
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories">
+                <i class="icon icon-lg icon-th-list"></i>
+                Categories
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/fibbery" target="_blank">
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">Dubbo通信实现</div>
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="検索">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menuShare">
+            <i class="icon icon-lg icon-share-alt"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+
+    <div class="container fade-scale">
+        <h1 class="title">Dubbo通信实现</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2018-03-03T13:28:03.000Z" itemprop="datePublished" class="page-time">
+  2018-03-03
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/java/">java</a></li></ul>
+
+            
+        </h5>
+    </div>
+
+    
+
+
+</header>
+
+
+<div class="container body-wrap">
+    
+    <aside class="post-widget">
+        <nav class="post-toc-wrap post-toc-shrink" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#前提"><span class="post-toc-number">1.</span> <span class="post-toc-text">前提</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#具体实现"><span class="post-toc-number">2.</span> <span class="post-toc-text">具体实现</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#暴露服务"><span class="post-toc-number">2.1.</span> <span class="post-toc-text">暴露服务</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#引用服务"><span class="post-toc-number">2.2.</span> <span class="post-toc-text">引用服务</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#对消息的编码和解码"><span class="post-toc-number">2.3.</span> <span class="post-toc-text">对消息的编码和解码</span></a></li></ol></li></ol>
+        </nav>
+    </aside>
+
+
+<article id="post-Dubbo通信实现" class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">Dubbo通信实现</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2018-03-03 21:28:03" datetime="2018-03-03T13:28:03.000Z" itemprop="datePublished">2018-03-03</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/java/">java</a></li></ul>
+
+
+
+            
+<span id="busuanzi_container_page_pv" title="文章总阅读量" style="display:none">
+    <i class="icon icon-eye icon-pr"></i><span id="busuanzi_value_page_pv"></span>
+</span>
+
+
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="前提"><a href="#前提" class="headerlink" title="前提"></a>前提</h2><p>基于dubbo默认通讯服务器Netty来解析服务端和客户端如何通讯<br><a id="more"></a></p>
+<h2 id="具体实现"><a href="#具体实现" class="headerlink" title="具体实现"></a>具体实现</h2><h3 id="暴露服务"><a href="#暴露服务" class="headerlink" title="暴露服务"></a>暴露服务</h3><p>首先我们看下协议接口类Protocol中暴露服务的方法</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 暴露远程调用服务：</span></span><br><span class="line"><span class="comment"> * 1. 该通信协议必须在接到请求之后记录请求的源地址：</span></span><br><span class="line"><span class="comment"> *		RpcContext.getContext().setRemoteAddress()</span></span><br><span class="line"><span class="comment"> * 2. export必须是幂等的。意味着使用相同的URL不论是调用一次还是调用两次，结果都是一样的</span></span><br><span class="line"><span class="comment"> * 3. invoker实例是由框架实现的，跟协议没任何关系</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> T 服务的类型</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> invoker 服务实现的实例</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@return</span> 返回被暴露服务实例的引用，用于取消服务</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@Adaptive</span></span><br><span class="line">&lt;T&gt; <span class="function">Exporter&lt;T&gt; <span class="title">export</span><span class="params">(Invoker&lt;T&gt; invoker)</span> <span class="keyword">throws</span> RpcException</span>;</span><br></pre></td></tr></table></figure>
+<p>然后我们看分析dubbo协议的暴露服务的具体实现DubboProtocol.export的过程如下</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">export ---&gt; openServer ---&gt; createServer ---&gt;  Exchangers.bind(url,handler)</span><br></pre></td></tr></table></figure>
+<p>openServer根据invoker携带的URL信息获取host以及ip，如果已经存在，则不会创建服务。<br>然后我们继续看下<em>Exchanger</em>的实现</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> ExchangeServer <span class="title">bind</span><span class="params">(URL url, ExchangeHandler handler)</span> <span class="keyword">throws</span> RemotingException </span>&#123;</span><br><span class="line">       <span class="keyword">if</span> (url == <span class="keyword">null</span>) &#123;</span><br><span class="line">           <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(<span class="string">"url == null"</span>);</span><br><span class="line">       &#125;</span><br><span class="line">       <span class="keyword">if</span> (handler == <span class="keyword">null</span>) &#123;</span><br><span class="line">           <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(<span class="string">"handler == null"</span>);</span><br><span class="line">       &#125;</span><br><span class="line">       url = url.addParameterIfAbsent(Constants.CODEC_KEY, <span class="string">"exchange"</span>);</span><br><span class="line">       <span class="keyword">return</span> getExchanger(url).bind(url, handler);</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+<p><em>getExchanger(url)</em>典型的策略模式，得到HeaderExchanger，代码如下</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> ExchangeServer <span class="title">bind</span><span class="params">(URL url, ExchangeHandler handler)</span> <span class="keyword">throws</span> RemotingException </span>&#123;</span><br><span class="line">       <span class="keyword">return</span> <span class="keyword">new</span> HeaderExchangeServer(Transporters.bind(url, <span class="keyword">new</span> DecodeHandler(<span class="keyword">new</span> HeaderExchangeHandler(handler))));</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+<ol>
+<li><em>HeaderExchangeServer</em>其实是真正server的包裹类，提供了server的一些操作接口已经对server的一个心跳检测功能。</li>
+<li>Transporters.bind这一步就是根据url选择对应的通信框架开启服务(此例中采用NettyTransport)。</li>
+<li>new DecodeHandler(new HeaderExchangeHandler(handler)))采用装饰器模式构造服务端通道的handler</li>
+</ol>
+<blockquote>
+<p>此处不讨论DecodeHandler如何对该协议通道的信息decode以及encode的过程</p>
+</blockquote>
+<h3 id="引用服务"><a href="#引用服务" class="headerlink" title="引用服务"></a>引用服务</h3><p>我们看下Protocol中引用服务的方法</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">   <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 引用远程服务</span></span><br><span class="line"><span class="comment">     * 1.当使用者调用invoker(通信协议使用refer方法生成)的invoke方法的时候，通信协议</span></span><br><span class="line"><span class="comment">     * 会相应的让服务端对应的invoker调用invoke方法。</span></span><br><span class="line"><span class="comment">     * 2.refer返回的invoker实例是由通信协议生成实现的。实现的过程只不过是将方法调用的过程</span></span><br><span class="line"><span class="comment">     * 封装成用远程请求的方式。</span></span><br><span class="line"><span class="comment">     * 3.当URL设置check=false的时候，客户端不应该在连接服务端失败的时候抛出异常，并且有</span></span><br><span class="line"><span class="comment">     * 义务尝试重连</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> &lt;T&gt; 远程服务的类型</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> type 远程服务类的class</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> url 远程服务的url</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span> invoker 远程服务的本地代理实现</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line"><span class="meta">@Adaptive</span></span><br><span class="line">&lt;T&gt; <span class="function">Invoker&lt;T&gt; <span class="title">refer</span><span class="params">(Class&lt;T&gt; type, URL url)</span> <span class="keyword">throws</span> RpcException</span>;</span><br></pre></td></tr></table></figure>
+<p>我们还是通过DubboProtocol来看客户端如何实现远程调用，refer方法在初始的时候会初始化一个与对应远端的连接，同时返回持有这个连接的对象invoker。我们需要将其转换成对应需要使用的服务类，在这里就需要用到动态代理这样的一个方式来生成一个本地句柄，以便客户端像调用本地服务一样调用。所以，一般客户端使用如下(伪码)：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ProxyFactory proxyFactory = ExtensionLoader.getExtensionLoader(ProxyFactory.class).getAdaptiveExtension();</span><br><span class="line">DemoService service = proxyFactory.getProxy(refer(type,url)); <span class="comment">//本地生成代理类</span></span><br><span class="line">service.echo(); <span class="comment">//调用方法</span></span><br></pre></td></tr></table></figure></p>
+<p>接下来我们具体看JavassistProxyFactory是怎么生成一个客户端需要的代理类的，代码如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> &lt;T&gt; <span class="function">T <span class="title">getProxy</span><span class="params">(Invoker&lt;T&gt; invoker, Class&lt;?&gt;[] interfaces)</span> </span>&#123;</span><br><span class="line">     <span class="keyword">return</span> (T) Proxy.getProxy(interfaces).newInstance(<span class="keyword">new</span> InvokerInvocationHandler(invoker));</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure></p>
+<p>InvokerInvocationHandler这个类是很明显的装饰器模式，让属于Object类中的方法以及toString、hashCode、equals一些通用方法只在本地调用，实际上我们还是使用的DubboInvoker的invoker方法，也就是其中具体的doInvoke方法。代码点实现也只是使用返回的invoker对象中持有的客户端连接来发送请求消息，获取返回结果。</p>
+<blockquote>
+<p>dubbo暴露方法和对远程方法的调用可以阅读源码DubboProtocolTest.testDemoProtocol来了解</p>
+</blockquote>
+<h3 id="对消息的编码和解码"><a href="#对消息的编码和解码" class="headerlink" title="对消息的编码和解码"></a>对消息的编码和解码</h3><p>上面了解到远程调用的过程实际上是本地发送请求消息，远端根据请求返回结果的一个过程，这就需要我们对传输过程中消息的编码/解码有一个清晰的认识，我们仍然用Netty作为传输层来阐明Dubbo消息的编码/解码。</p>
+<ol>
+<li></li>
+</ol>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    
+    <div class="content">
+        
+<span class="post-time">
+    最終更新：<time datetime="2019-03-04T01:55:25.542Z" itemprop="dateUpdated">2019-03-04 09:55:25</time>
+</span><br>
+
+
+        
+        这里可以写作者留言，标签和 hexo 中所有变量及辅助函数等均可调用，示例：<a href="/2018/03/03/Dubbo通信实现/" target="_blank" rel="external">https://fibbery.github.io/2018/03/03/Dubbo通信实现/</a>
+        
+    </div>
+    
+    <footer>
+        <a href="https://fibbery.github.io">
+            <img src="/img/avatar.jpg" alt="Fibbery">
+            Fibbery
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/dubbo/">dubbo</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/netty/">netty</a></li></ul>
+
+
+            
+<div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://fibbery.github.io/2018/03/03/Dubbo通信实现/&title=《Dubbo通信实现》 — 小笔记本&pic=https://fibbery.github.io/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://fibbery.github.io/2018/03/03/Dubbo通信实现/&title=《Dubbo通信实现》 — 小笔记本&source=前提基于dubbo默认通讯服务器Netty来解析服务端和客户端如何通讯" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://fibbery.github.io/2018/03/03/Dubbo通信实现/" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《Dubbo通信实现》 — 小笔记本&url=https://fibbery.github.io/2018/03/03/Dubbo通信实现/&via=https://fibbery.github.io" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://fibbery.github.io/2018/03/03/Dubbo通信实现/" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/2018/03/06/Java序列化的一些了解/" id="post-prev" class="post-nav-link">
+        <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
+        <h4 class="title">Java序列化的一些了解</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/2018/02/06/OpenSSL生成根证书CA/" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">OpenSSL生成根证书CA</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        
+<p>
+    <span id="busuanzi_container_site_uv" style="display:none">
+        站点总访客数：<span id="busuanzi_value_site_uv"></span>
+    </span>
+    <span id="busuanzi_container_site_pv" style="display:none">
+        站点总访问量：<span id="busuanzi_value_site_pv"></span>
+    </span>
+</p>
+
+
+        <p>
+            
+                <span><a href="/atom.xml" target="_blank" class="rss" title="rss"><i class="icon icon-lg icon-rss"></i></a></span>
+            
+            <span>このブログの内容物は<a rel="license" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.ja">クリエイティブ・コモンズ 表示 - 非営利 - 継承 4.0 国際ライセンスの下に提供されています</a></span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p><span>Fibbery &copy; 2015 - 2019</span>
+            <span>
+                
+                Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/yscoder/hexo-theme-indigo" target="_blank">indigo</a>
+            </span>
+        </p>
+    </div>
+</footer>
+
+    </main>
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://fibbery.github.io/2018/03/03/Dubbo通信实现/&title=《Dubbo通信实现》 — 小笔记本&pic=https://fibbery.github.io/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://fibbery.github.io/2018/03/03/Dubbo通信实现/&title=《Dubbo通信实现》 — 小笔记本&source=前提基于dubbo默认通讯服务器Netty来解析服务端和客户端如何通讯" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://fibbery.github.io/2018/03/03/Dubbo通信实现/" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《Dubbo通信实现》 — 小笔记本&url=https://fibbery.github.io/2018/03/03/Dubbo通信实现/&via=https://fibbery.github.io" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://fibbery.github.io/2018/03/03/Dubbo通信实现/" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMYAAADGCAAAAACs8KCBAAACIklEQVR42u3aMZLCMAwFUO5/abalifMlh51BfqkYiBM/F0KW/HrF1/vjWn9z9evVM9dvefjCwMD4WcZ7eSX3XI3KF6L3XgwMjNMY64CYhM6rALp+ZsJIgjUGBgbG+vVJspiPxcDAwHgq4OYbzjz5ywM9BgbGmYxeilbeahYTyq/sxTEwMH6QkVfd///zV/obGBgYP8XolfvXgXInWDdnhYGBMZqRB7jelnU/cBfegoGBMZqRh8vePXmq12uFYmBgnMDI077q2lTTymRs9L+BgYExjpFPZSf4VsNxswGAgYExjrHTIKyW1fLjF+WiHgYGxpGMXrm/1xJIPt88EwMD4wDGs0cxnjquURiLgYExmrFTMsunW0VWt9AYGBgnMKobyJ0JrSfXW1YMDIzZjGqBPm9wJqF2p8EZRWUMDIwRjLwDWMgxY171IEWUGmJgYAxlVMNrHuXyqfcSUAwMjHMYOwF350BGNd28GYWBgTGasROhe8liLwHtHUHDwMCYwaiGvHxs8mu+KDdlOAwMjAMY0a2tAxY7IbvwX4GBgXEAo9rO3G9DlrPUNQwDA2Moo1fQr5bSeiW5wv4bAwNjNOPZols1WCeBeH+ZMDAwZjCqByN6pbQeuNmkxMDAGMrId73fKMDl073JczEwMDCKdfjek5tUDAwMjO1Cf360onknBgbGAYz8aGmvwVnduJYbDxgYGKMZWyc1itvdnJSMwsDAOIDxB6VNvCrG7cLuAAAAAElFTkSuQmCC" alt="微信分享二维码">
+</div>
+
+
+
+
+    <script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>
+<script>
+var BLOG = { ROOT: '/', SHARE: true, REWARD: false };
+
+
+</script>
+
+<script src="//unpkg.com/hexo-theme-material-indigo@latest/js/main.min.js"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script src="//unpkg.com/hexo-theme-material-indigo@latest/js/search.min.js" async></script>
+
+
+
+
+
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+<script>
+(function() {
+    var OriginTitile = document.title, titleTime;
+    document.addEventListener('visibilitychange', function() {
+        if (document.hidden) {
+            document.title = '死鬼去哪里了！';
+            clearTimeout(titleTime);
+        } else {
+            document.title = '(つェ⊂)咦!又好了!';
+            titleTime = setTimeout(function() {
+                document.title = OriginTitile;
+            },2000);
+        }
+    });
+})();
+</script>
+
+
+
+</body>
+</html>

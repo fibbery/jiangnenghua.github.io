@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+    
+
+    
+
+    
+
+
+
+    <meta charset="utf-8">
+    
+    
+    
+    
+    <title>使用docker搭建mysql简单主从集群 | 小笔记本 | 好风凭借力，送我上青云</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    <meta name="theme-color" content="#3F51B5">
+    
+    
+    <meta name="keywords" content="mysql,docker">
+    <meta name="description" content="前言最近对mysql集群搭建以及后期如何在线上进行拆分和迁移产生了兴趣，所以初步想在自己本机通过docker搭建一个简单的主从集群来满足一下好奇心 开发环境OS X EI Capitan 10.11.6docker版本17.09.0-ce-mac35 (19611)mysql镜像版本5.7(这里我直接下载的标签为latest的最新版本) 具体实现步骤建立主库容器 建立主数据库  1docker r">
+<meta name="keywords" content="mysql,docker">
+<meta property="og:type" content="article">
+<meta property="og:title" content="使用docker搭建mysql简单主从集群">
+<meta property="og:url" content="https://fibbery.github.io/2018/05/09/使用docker搭建mysql简单主从集群/index.html">
+<meta property="og:site_name" content="小笔记本">
+<meta property="og:description" content="前言最近对mysql集群搭建以及后期如何在线上进行拆分和迁移产生了兴趣，所以初步想在自己本机通过docker搭建一个简单的主从集群来满足一下好奇心 开发环境OS X EI Capitan 10.11.6docker版本17.09.0-ce-mac35 (19611)mysql镜像版本5.7(这里我直接下载的标签为latest的最新版本) 具体实现步骤建立主库容器 建立主数据库  1docker r">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2019-03-04T01:55:25.543Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="使用docker搭建mysql简单主从集群">
+<meta name="twitter:description" content="前言最近对mysql集群搭建以及后期如何在线上进行拆分和迁移产生了兴趣，所以初步想在自己本机通过docker搭建一个简单的主从集群来满足一下好奇心 开发环境OS X EI Capitan 10.11.6docker版本17.09.0-ce-mac35 (19611)mysql镜像版本5.7(这里我直接下载的标签为latest的最新版本) 具体实现步骤建立主库容器 建立主数据库  1docker r">
+    
+        <link rel="alternate" type="application/atom+xml" title="小笔记本" href="/atom.xml">
+    
+    <link rel="shortcut icon" href="/img/favicon.ico">
+    <link rel="stylesheet" href="//unpkg.com/hexo-theme-material-indigo@latest/css/style.css">
+    <script>window.lazyScripts=[]</script>
+
+    <!-- custom head -->
+    
+
+</head>
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide">
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap" style="background-image:url(/)">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.jpg">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">Fibbery</h5>
+          <a href="mailto:568263091@qq.com" title="568263091@qq.com" class="mail">568263091@qq.com</a>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/">
+                <i class="icon icon-lg icon-home"></i>
+                主页
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/archives">
+                <i class="icon icon-lg icon-archives"></i>
+                Archives
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags">
+                <i class="icon icon-lg icon-tags"></i>
+                Tags
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories">
+                <i class="icon icon-lg icon-th-list"></i>
+                Categories
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/fibbery" target="_blank">
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">使用docker搭建mysql简单主从集群</div>
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="検索">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menuShare">
+            <i class="icon icon-lg icon-share-alt"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+
+    <div class="container fade-scale">
+        <h1 class="title">使用docker搭建mysql简单主从集群</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2018-05-09T12:32:37.000Z" itemprop="datePublished" class="page-time">
+  2018-05-09
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/mysql/">mysql</a></li></ul>
+
+            
+        </h5>
+    </div>
+
+    
+
+
+</header>
+
+
+<div class="container body-wrap">
+    
+    <aside class="post-widget">
+        <nav class="post-toc-wrap post-toc-shrink" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#前言"><span class="post-toc-number">1.</span> <span class="post-toc-text">前言</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#开发环境"><span class="post-toc-number">2.</span> <span class="post-toc-text">开发环境</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#具体实现步骤"><span class="post-toc-number">3.</span> <span class="post-toc-text">具体实现步骤</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#建立主库容器"><span class="post-toc-number">3.1.</span> <span class="post-toc-text">建立主库容器</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#建立从库容器"><span class="post-toc-number">3.2.</span> <span class="post-toc-text">建立从库容器</span></a></li></ol></li></ol>
+        </nav>
+    </aside>
+
+
+<article id="post-使用docker搭建mysql简单主从集群" class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">使用docker搭建mysql简单主从集群</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2018-05-09 20:32:37" datetime="2018-05-09T12:32:37.000Z" itemprop="datePublished">2018-05-09</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/mysql/">mysql</a></li></ul>
+
+
+
+            
+<span id="busuanzi_container_page_pv" title="文章总阅读量" style="display:none">
+    <i class="icon icon-eye icon-pr"></i><span id="busuanzi_value_page_pv"></span>
+</span>
+
+
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>最近对mysql集群搭建以及后期如何在线上进行拆分和迁移产生了兴趣，所以初步想在自己本机通过docker搭建一个简单的主从集群来满足一下好奇心</p>
+<h2 id="开发环境"><a href="#开发环境" class="headerlink" title="开发环境"></a>开发环境</h2><p>OS X EI Capitan 10.11.6<br>docker版本17.09.0-ce-mac35 (19611)<br>mysql镜像版本5.7(这里我直接下载的标签为latest的最新版本)</p>
+<h2 id="具体实现步骤"><a href="#具体实现步骤" class="headerlink" title="具体实现步骤"></a>具体实现步骤</h2><h3 id="建立主库容器"><a href="#建立主库容器" class="headerlink" title="建立主库容器"></a>建立主库容器</h3><ol>
+<li><p>建立主数据库</p>
+ <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -d -p 3307:3306 -v /data/mysqlcnf/master:/etc/mysql/conf.d -e MYSQL_ROOT_PASSWORD=123456 --name master mysql</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>在本机目录/data/mysqlcnf/master中新建mysql数据库配置文件my.cnf，内容如下:</p>
+ <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[mysqld]</span><br><span class="line">server-id                = 1</span><br><span class="line">log_bin                  = mysql-bin</span><br><span class="line">binlog-format            = ROW</span><br><span class="line">lower_case_table_names   = 1</span><br></pre></td></tr></table></figure>
+<p> 需要注意下mysql镜像自带是有配置文件的，我们映射过来的文件夹并不能完全覆盖，所以不要让配置文件冲突</p>
+</li>
+<li><p>重启容器</p>
+ <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker restart master</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>建立授权帐号</p>
+ <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">grant</span> <span class="keyword">replication</span> <span class="keyword">slave</span> <span class="keyword">on</span> *.* <span class="keyword">to</span> <span class="string">'sync'</span>@<span class="string">'%'</span> <span class="keyword">identified</span> <span class="keyword">by</span> <span class="string">'sync'</span></span><br><span class="line"><span class="keyword">flush</span> <span class="keyword">privileges</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>查询下主库当前binlog情况</p>
+ <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">show</span> <span class="keyword">master</span> <span class="keyword">status</span></span><br></pre></td></tr></table></figure>
+<p> 记录下file和position，等到设置从库时需要</p>
+</li>
+</ol>
+<h3 id="建立从库容器"><a href="#建立从库容器" class="headerlink" title="建立从库容器"></a>建立从库容器</h3><ol>
+<li><p>建立从数据库(使用link实现从库连接主库)</p>
+ <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -d -p 3307:3306 -v /data/mysqlcnf/slave:/etc/mysql/conf.d -e MYSQL_ROOT_PASSWORD=123456 --name slave --link master:master mysql</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>从库配置文件</p>
+ <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">[mysqld]</span><br><span class="line">server-id              = 2</span><br><span class="line"></span><br><span class="line">log-bin                = mysql-bin</span><br><span class="line">binlog-format          = ROW</span><br><span class="line">lower_case_table_names = 1</span><br><span class="line">log-slave-updates      = 1</span><br><span class="line">relay-log              = slave-relay-bin</span><br><span class="line">relay-log-index        = slave-relay-bin.index</span><br><span class="line">read-only              = 1</span><br></pre></td></tr></table></figure>
+<p> log-slave-updates参数的意义在于，如果该库是从库，从主库binlog读取的更新是不会继续写入该库的binlog，设置该参数后则可以实现读取主库binlog之后写入自己库的binlog，用来做其他从库的主库</p>
+</li>
+<li><p>重启容器</p>
+ <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker restart slave</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>登录从库服务器设置主库</p>
+ <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CHANGE</span> <span class="keyword">MASTER</span> <span class="keyword">TO</span> MASTER_HOST=<span class="string">'master'</span>,MASTER_USER=<span class="string">'sync'</span>, MASTER_PASSWORD=<span class="string">'sync'</span>,MASTER_LOG_FILE=<span class="string">'mysql-bin.000005'</span>, MASTER_LOG_POS=<span class="number">154</span>;</span><br><span class="line"><span class="keyword">flush</span> <span class="keyword">privileges</span></span><br><span class="line"><span class="keyword">start</span> <span class="keyword">slave</span></span><br></pre></td></tr></table></figure>
+<p> 这里设置的值master_log_file以及master_log_pos根据当初查询主库得来</p>
+</li>
+<li><p>查看从库状态</p>
+ <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">show</span> <span class="keyword">slave</span> <span class="keyword">status</span>\G</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>至此简单的mysql的主从集群搭建完成</p>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    
+    <div class="content">
+        
+<span class="post-time">
+    最終更新：<time datetime="2019-03-04T01:55:25.543Z" itemprop="dateUpdated">2019-03-04 09:55:25</time>
+</span><br>
+
+
+        
+        这里可以写作者留言，标签和 hexo 中所有变量及辅助函数等均可调用，示例：<a href="/2018/05/09/使用docker搭建mysql简单主从集群/" target="_blank" rel="external">https://fibbery.github.io/2018/05/09/使用docker搭建mysql简单主从集群/</a>
+        
+    </div>
+    
+    <footer>
+        <a href="https://fibbery.github.io">
+            <img src="/img/avatar.jpg" alt="Fibbery">
+            Fibbery
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/docker/">docker</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mysql/">mysql</a></li></ul>
+
+
+            
+<div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://fibbery.github.io/2018/05/09/使用docker搭建mysql简单主从集群/&title=《使用docker搭建mysql简单主从集群》 — 小笔记本&pic=https://fibbery.github.io/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://fibbery.github.io/2018/05/09/使用docker搭建mysql简单主从集群/&title=《使用docker搭建mysql简单主从集群》 — 小笔记本&source=一些开发的2B笔记" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://fibbery.github.io/2018/05/09/使用docker搭建mysql简单主从集群/" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《使用docker搭建mysql简单主从集群》 — 小笔记本&url=https://fibbery.github.io/2018/05/09/使用docker搭建mysql简单主从集群/&via=https://fibbery.github.io" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://fibbery.github.io/2018/05/09/使用docker搭建mysql简单主从集群/" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/2018/05/10/使用docker搭建mysql双主配置/" id="post-prev" class="post-nav-link">
+        <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
+        <h4 class="title">使用docker搭建mysql双主配置</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/2018/03/06/Java序列化的一些了解/" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">Java序列化的一些了解</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        
+<p>
+    <span id="busuanzi_container_site_uv" style="display:none">
+        站点总访客数：<span id="busuanzi_value_site_uv"></span>
+    </span>
+    <span id="busuanzi_container_site_pv" style="display:none">
+        站点总访问量：<span id="busuanzi_value_site_pv"></span>
+    </span>
+</p>
+
+
+        <p>
+            
+                <span><a href="/atom.xml" target="_blank" class="rss" title="rss"><i class="icon icon-lg icon-rss"></i></a></span>
+            
+            <span>このブログの内容物は<a rel="license" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.ja">クリエイティブ・コモンズ 表示 - 非営利 - 継承 4.0 国際ライセンスの下に提供されています</a></span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p><span>Fibbery &copy; 2015 - 2019</span>
+            <span>
+                
+                Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/yscoder/hexo-theme-indigo" target="_blank">indigo</a>
+            </span>
+        </p>
+    </div>
+</footer>
+
+    </main>
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://fibbery.github.io/2018/05/09/使用docker搭建mysql简单主从集群/&title=《使用docker搭建mysql简单主从集群》 — 小笔记本&pic=https://fibbery.github.io/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://fibbery.github.io/2018/05/09/使用docker搭建mysql简单主从集群/&title=《使用docker搭建mysql简单主从集群》 — 小笔记本&source=一些开发的2B笔记" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://fibbery.github.io/2018/05/09/使用docker搭建mysql简单主从集群/" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《使用docker搭建mysql简单主从集群》 — 小笔记本&url=https://fibbery.github.io/2018/05/09/使用docker搭建mysql简单主从集群/&via=https://fibbery.github.io" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://fibbery.github.io/2018/05/09/使用docker搭建mysql简单主从集群/" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAN4AAADeCAAAAAB3DOFrAAACwUlEQVR42u3a0WrjQAwF0P7/T2ehT4XFzr2Sp9mFM0+hSew5KliKNF9f8Xp9r/t3f67k3fzvV1d+bOHh4eGNtn5/uavXf1/hKij5RvM9RCHAw8PDO8a7TwbJZ9qQ5elhtR88PDy8j/LyonYWjvtkg4eHh/c/8vINJaHJS/l7Kh4eHt6neO1t2iSRbPEVrIO9Fjw8PLwDU6R/5/XB+R4eHh7eYqqej8SSYVjb5nitFx4eHt4J3r5FO8tF93dMxmDFHvDw8PAe5bUNgvwKyXGBp5LE5TXx8PDwDvDy4VZbRu8L6zYoxXwPDw8Pb81rH8HJQzy52axcXo278PDw8Na8tkXbPuLb0MxCfHlNPDw8vAO8TUNhhmxTRZ4SigEYHh4e3oJ3ug1xn3hmqaj4rYCHh4d3gJe0DzbtiU1ztt151KXGw8PDW/Nmj+MkGcwGV7NDDMWhATw8PLxHee34P0fmgciDEr2Lh4eHd4DXXrQthfNechLK2bANDw8P71le3n5Nytn8Om2Z3gYODw8P7xyvPcC0KcFn6aQ9uPDm6BUeHh7eo7y8adsehGoPAcxSSBEOPDw8vAVvxshbusOOSHzq4c3/DQ8PD+8Arx1lbQb5eak9LJTz/IOHh4e34LVF7b6dmgcub2dc7hYPDw/vAK99us5K6k1Lt22U1CkEDw8Pb8F7dtxVj/YfKruHvQ08PDy8krc5DnX/cE8CNEs/RSDw8PDwjvHqn/FxkyJvedTZLPkWHh4e3qO8V7nadmqbMPIiPkpIeHh4eAd4mwSQF74tOz+Wumki4+Hh4W14yYZmjYNZKdw2I958Fw8PD+8Yrx3tv9ZrlniGAzA8PDy8j/JmA7NkQ+0no6Dg4eHhfZS36Wrkg67N8S88PDy83+RtDlolG8pL4bwVMuxz4OHh4a157WM9v1n7EN8Ed8XGw8PDS3l/AEowDQEpMjgUAAAAAElFTkSuQmCC" alt="微信分享二维码">
+</div>
+
+
+
+
+    <script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>
+<script>
+var BLOG = { ROOT: '/', SHARE: true, REWARD: false };
+
+
+</script>
+
+<script src="//unpkg.com/hexo-theme-material-indigo@latest/js/main.min.js"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script src="//unpkg.com/hexo-theme-material-indigo@latest/js/search.min.js" async></script>
+
+
+
+
+
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+<script>
+(function() {
+    var OriginTitile = document.title, titleTime;
+    document.addEventListener('visibilitychange', function() {
+        if (document.hidden) {
+            document.title = '死鬼去哪里了！';
+            clearTimeout(titleTime);
+        } else {
+            document.title = '(つェ⊂)咦!又好了!';
+            titleTime = setTimeout(function() {
+                document.title = OriginTitile;
+            },2000);
+        }
+    });
+})();
+</script>
+
+
+
+</body>
+</html>
