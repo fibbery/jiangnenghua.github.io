@@ -1,774 +1,306 @@
 <!DOCTYPE html>
-<html>
-<head><meta name="generator" content="Hexo 3.8.0">
-    
-
-    
-
-    
-
-
-
-    <meta charset="utf-8">
-    
-    
-    
-    
-    <title>小笔记本 | 好风凭借力，送我上青云</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-    
-    <meta name="theme-color" content="#3F51B5">
-    
-    
-    <meta name="keywords" content>
-    <meta name="description" content="一些开发的2B笔记">
-<meta property="og:type" content="website">
-<meta property="og:title" content="小笔记本">
-<meta property="og:url" content="https://fibbery.github.io/index.html">
-<meta property="og:site_name" content="小笔记本">
-<meta property="og:description" content="一些开发的2B笔记">
-<meta property="og:locale" content="zh-Hans">
-<meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="小笔记本">
-<meta name="twitter:description" content="一些开发的2B笔记">
-    
-        <link rel="alternate" type="application/atom+xml" title="小笔记本" href="/atom.xml">
-    
-    <link rel="shortcut icon" href="/img/favicon.ico">
-    <link rel="stylesheet" href="//unpkg.com/hexo-theme-material-indigo@latest/css/style.css">
-    <script>window.lazyScripts=[]</script>
-
-    <!-- custom head -->
-    
-
-</head>
-
-<body>
-    <div id="loading" class="active"></div>
-
-    <aside id="menu">
-  <div class="inner flex-row-vertical">
-    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
-        <i class="icon icon-lg icon-close"></i>
-    </a>
-    <div class="brand-wrap" style="background-image:url(/)">
-      <div class="brand">
-        <a href="/" class="avatar waves-effect waves-circle waves-light">
-          <img src="/img/avatar.jpg">
-        </a>
-        <hgroup class="introduce">
-          <h5 class="nickname">Fibbery</h5>
-          <a href="mailto:568263091@qq.com" title="568263091@qq.com" class="mail">568263091@qq.com</a>
-        </hgroup>
-      </div>
-    </div>
-    <div class="scroll-wrap flex-col">
-      <ul class="nav">
-        
-            <li class="waves-block waves-effect active">
-              <a href="/">
-                <i class="icon icon-lg icon-home"></i>
-                主页
-              </a>
-            </li>
-        
-            <li class="waves-block waves-effect">
-              <a href="/archives">
-                <i class="icon icon-lg icon-archives"></i>
-                Archives
-              </a>
-            </li>
-        
-            <li class="waves-block waves-effect">
-              <a href="/tags">
-                <i class="icon icon-lg icon-tags"></i>
-                Tags
-              </a>
-            </li>
-        
-            <li class="waves-block waves-effect">
-              <a href="/categories">
-                <i class="icon icon-lg icon-th-list"></i>
-                Categories
-              </a>
-            </li>
-        
-            <li class="waves-block waves-effect">
-              <a href="https://github.com/fibbery" target="_blank">
-                <i class="icon icon-lg icon-github"></i>
-                Github
-              </a>
-            </li>
-        
-      </ul>
-    </div>
-  </div>
-</aside>
-
-    <main id="main">
-        <header class="top-header" id="header">
-    <div class="flex-row">
-        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
-          <i class="icon icon-lg icon-navicon"></i>
-        </a>
-        <div class="flex-col header-title ellipsis">小笔记本</div>
-        
-        <div class="search-wrap" id="search-wrap">
-            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
-                <i class="icon icon-lg icon-chevron-left"></i>
-            </a>
-            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="検索">
-            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search">
-                <i class="icon icon-lg icon-search"></i>
-            </a>
-        </div>
-        
-        
-        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menuShare">
-            <i class="icon icon-lg icon-share-alt"></i>
-        </a>
-        
-    </div>
-</header>
-<header class="content-header index-header">
-
-    <div class="container fade-scale">
-        <h1 class="title">小笔记本</h1>
-        <h5 class="subtitle">
-            
-                好风凭借力，送我上青云
-            
-        </h5>
-    </div>
-
-    
-
-
-</header>
-
-<div class="container body-wrap">
-
-    <ul class="post-list">
-    
-        <li class="post-list-item fade">
-            <article id="post-一次insert into...on duplicate key upadte引发的问题" class="article-card article-type-post" itemprop="blogPost">
-
-    <div class="post-meta">
-        <time class="post-time" title="2019-01-09 17:05:51" datetime="2019-01-09T09:05:51.000Z" itemprop="datePublished">2019-01-09</time>
-
-        
-	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/mysql/">mysql</a></li></ul>
-
-
-
-    </div>
-
-    
-
-
-  
-    <h3 class="post-title" itemprop="name">
-      <a class="post-title-link" href="/2019/01/09/一次insert into...on duplicate key upadte引发的问题/">一次insert into on duplicate key upadte引发的问题</a>
-    </h3>
-  
-
-
-
-
-    <div class="post-content" id="post-content" itemprop="postContent">
-
-    
-        问题  最近有业务场景使用insert into … on duplicate key update进行插入更新操作，然后通过返回的affected rows来确定是进行了插入操作还是更新操作。印象中当不出现键冲突的时候affected rows应该为1（作用等同于insert into）, 而当键冲突的时候affected rows应该为2。但是实际情况是...
-    
-
-        <a href="/2019/01/09/一次insert into...on duplicate key upadte引发的问题/" class="post-more waves-effect waves-button">
-            続きを読む…
-        </a>
-    </div>
-    
-    <div class="post-footer">
-        
-	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mysql/">mysql</a></li></ul>
-
-    </div>
-    
-</article>
-
-        </li>
-    
-        <li class="post-list-item fade">
-            <article id="post-使用docker搭建mysql双主配置" class="article-card article-type-post" itemprop="blogPost">
-
-    <div class="post-meta">
-        <time class="post-time" title="2018-05-10 10:23:53" datetime="2018-05-10T02:23:53.000Z" itemprop="datePublished">2018-05-10</time>
-
-        
-	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/mysql/">mysql</a></li></ul>
-
-
-
-    </div>
-
-    
-
-
-  
-    <h3 class="post-title" itemprop="name">
-      <a class="post-title-link" href="/2018/05/10/使用docker搭建mysql双主配置/">使用docker搭建mysql双主配置</a>
-    </h3>
-  
-
-
-
-
-    <div class="post-content" id="post-content" itemprop="postContent">
-
-    
-        前言互联网架构需要保证数据库高可用，常见的一种方式，使用双主同步+keepalived+虚ip的方式保证数据库的可用性。依照前文使用docker搭建mysql简单主从集群 想尝试一下使用docker搭建会有什么问题
-实践步骤
-搭建好docker网络 因为需要两个容器互联，所以需要使用docker连创建互联网络，参见用network create解决Docker容器互相连接的问题 
- 12...
-    
-
-        <a href="/2018/05/10/使用docker搭建mysql双主配置/" class="post-more waves-effect waves-button">
-            続きを読む…
-        </a>
-    </div>
-    
-    <div class="post-footer">
-        
-	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/docker/">docker</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mysql/">mysql</a></li></ul>
-
-    </div>
-    
-</article>
-
-        </li>
-    
-        <li class="post-list-item fade">
-            <article id="post-使用docker搭建mysql简单主从集群" class="article-card article-type-post" itemprop="blogPost">
-
-    <div class="post-meta">
-        <time class="post-time" title="2018-05-09 20:32:37" datetime="2018-05-09T12:32:37.000Z" itemprop="datePublished">2018-05-09</time>
-
-        
-	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/mysql/">mysql</a></li></ul>
-
-
-
-    </div>
-
-    
-
-
-  
-    <h3 class="post-title" itemprop="name">
-      <a class="post-title-link" href="/2018/05/09/使用docker搭建mysql简单主从集群/">使用docker搭建mysql简单主从集群</a>
-    </h3>
-  
-
-
-
-
-    <div class="post-content" id="post-content" itemprop="postContent">
-
-    
-        前言最近对mysql集群搭建以及后期如何在线上进行拆分和迁移产生了兴趣，所以初步想在自己本机通过docker搭建一个简单的主从集群来满足一下好奇心
-开发环境OS X EI Capitan 10.11.6docker版本17.09.0-ce-mac35 (19611)mysql镜像版本5.7(这里我直接下载的标签为latest的最新版本)
-具体实现步骤建立主库容器
-建立主数据库
- 1docke...
-    
-
-        <a href="/2018/05/09/使用docker搭建mysql简单主从集群/" class="post-more waves-effect waves-button">
-            続きを読む…
-        </a>
-    </div>
-    
-    <div class="post-footer">
-        
-	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/docker/">docker</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mysql/">mysql</a></li></ul>
-
-    </div>
-    
-</article>
-
-        </li>
-    
-        <li class="post-list-item fade">
-            <article id="post-Java序列化的一些了解" class="article-card article-type-post" itemprop="blogPost">
-
-    <div class="post-meta">
-        <time class="post-time" title="2018-03-06 23:53:54" datetime="2018-03-06T15:53:54.000Z" itemprop="datePublished">2018-03-06</time>
-
-        
-	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/java/">java</a></li></ul>
-
-
-
-    </div>
-
-    
-
-
-  
-    <h3 class="post-title" itemprop="name">
-      <a class="post-title-link" href="/2018/03/06/Java序列化的一些了解/">Java序列化的一些了解</a>
-    </h3>
-  
-
-
-
-
-    <div class="post-content" id="post-content" itemprop="postContent">
-
-    
-        引言通常来说序列化和反序列化通常是一起的。我们常见的就是你只要将类实现Serializable接口，就能将该类的对象序列化二进制文件，同时能通过反序列化将二进制文件还原成对象。
-    
-
-        <a href="/2018/03/06/Java序列化的一些了解/" class="post-more waves-effect waves-button">
-            続きを読む…
-        </a>
-    </div>
-    
-    <div class="post-footer">
-        
-	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/serializable/">serializable</a></li></ul>
-
-    </div>
-    
-</article>
-
-        </li>
-    
-        <li class="post-list-item fade">
-            <article id="post-Dubbo通信实现" class="article-card article-type-post" itemprop="blogPost">
-
-    <div class="post-meta">
-        <time class="post-time" title="2018-03-03 21:28:03" datetime="2018-03-03T13:28:03.000Z" itemprop="datePublished">2018-03-03</time>
-
-        
-	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/java/">java</a></li></ul>
-
-
-
-    </div>
-
-    
-
-
-  
-    <h3 class="post-title" itemprop="name">
-      <a class="post-title-link" href="/2018/03/03/Dubbo通信实现/">Dubbo通信实现</a>
-    </h3>
-  
-
-
-
-
-    <div class="post-content" id="post-content" itemprop="postContent">
-
-    
-        前提基于dubbo默认通讯服务器Netty来解析服务端和客户端如何通讯
-    
-
-        <a href="/2018/03/03/Dubbo通信实现/" class="post-more waves-effect waves-button">
-            続きを読む…
-        </a>
-    </div>
-    
-    <div class="post-footer">
-        
-	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/dubbo/">dubbo</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/netty/">netty</a></li></ul>
-
-    </div>
-    
-</article>
-
-        </li>
-    
-        <li class="post-list-item fade">
-            <article id="post-OpenSSL生成根证书CA" class="article-card article-type-post" itemprop="blogPost">
-
-    <div class="post-meta">
-        <time class="post-time" title="2018-02-06 10:38:49" datetime="2018-02-06T02:38:49.000Z" itemprop="datePublished">2018-02-06</time>
-
-        
-	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/其他/">其他</a></li></ul>
-
-
-
-    </div>
-
-    
-
-
-  
-    <h3 class="post-title" itemprop="name">
-      <a class="post-title-link" href="/2018/02/06/OpenSSL生成根证书CA/">OpenSSL生成根证书CA</a>
-    </h3>
-  
-
-
-
-
-    <div class="post-content" id="post-content" itemprop="postContent">
-
-    
-        准备环境本机Mac，所以只讨论Mac环境下的生成方法。需要安装openssl，如果没有可以使用homebrew安装。1brew install openssl
-    
-
-        <a href="/2018/02/06/OpenSSL生成根证书CA/" class="post-more waves-effect waves-button">
-            続きを読む…
-        </a>
-    </div>
-    
-    <div class="post-footer">
-        
-	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/https/">https</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/openssl/">openssl</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/证书/">证书</a></li></ul>
-
-    </div>
-    
-</article>
-
-        </li>
-    
-        <li class="post-list-item fade">
-            <article id="post-java读取openssl创建的公私钥" class="article-card article-type-post" itemprop="blogPost">
-
-    <div class="post-meta">
-        <time class="post-time" title="2018-01-19 18:38:12" datetime="2018-01-19T10:38:12.000Z" itemprop="datePublished">2018-01-19</time>
-
-        
-	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/其他/">其他</a></li></ul>
-
-
-
-    </div>
-
-    
-
-
-  
-    <h3 class="post-title" itemprop="name">
-      <a class="post-title-link" href="/2018/01/19/java读取openssl创建的公私钥/">java读取openssl创建的公私钥</a>
-    </h3>
-  
-
-
-
-
-    <div class="post-content" id="post-content" itemprop="postContent">
-
-    
-        最近在考虑使用Netty搭建HTTP/HTTPS代理服务器，遇到了openssl密钥读取问题，下面概述步骤。选用openssl生成密钥的初衷是netty的SslContextBuilder对其支持比较直接，相较于使用keytool更为容易读取。
-    
-
-        <a href="/2018/01/19/java读取openssl创建的公私钥/" class="post-more waves-effect waves-button">
-            続きを読む…
-        </a>
-    </div>
-    
-    <div class="post-footer">
-        
-	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/openssl/">openssl</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/rsa/">rsa</a></li></ul>
-
-    </div>
-    
-</article>
-
-        </li>
-    
-        <li class="post-list-item fade">
-            <article id="post-Dubbo中SPI拓展机制的实现" class="article-card article-type-post" itemprop="blogPost">
-
-    <div class="post-meta">
-        <time class="post-time" title="2018-01-15 23:09:56" datetime="2018-01-15T15:09:56.000Z" itemprop="datePublished">2018-01-15</time>
-
-        
-	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/java/">java</a></li></ul>
-
-
-
-    </div>
-
-    
-
-
-  
-    <h3 class="post-title" itemprop="name">
-      <a class="post-title-link" href="/2018/01/15/Dubbo中SPI拓展机制的实现/">Dubbo中SPI拓展机制的实现</a>
-    </h3>
-  
-
-
-
-
-    <div class="post-content" id="post-content" itemprop="postContent">
-
-    
-        初步说明下java原生的spi拓展加载机制：
-
-扫描META-INF/services下面的所有文件，文件都是使用接口或者抽象类名字作为文件名，具体实现类作为文件内容构成，在使用的时候只能通过遍历来实现查找和实例化，有可能会一次性把所有的实现都实例化，造成不必要的浪费。
-
-    
-
-        <a href="/2018/01/15/Dubbo中SPI拓展机制的实现/" class="post-more waves-effect waves-button">
-            続きを読む…
-        </a>
-    </div>
-    
-    <div class="post-footer">
-        
-	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/dubbo/">dubbo</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/spi/">spi</a></li></ul>
-
-    </div>
-    
-</article>
-
-        </li>
-    
-        <li class="post-list-item fade">
-            <article id="post-分析java线程池实现原理" class="article-card article-type-post" itemprop="blogPost">
-
-    <div class="post-meta">
-        <time class="post-time" title="2018-01-09 14:46:21" datetime="2018-01-09T06:46:21.000Z" itemprop="datePublished">2018-01-09</time>
-
-        
-	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/java/">java</a></li></ul>
-
-
-
-    </div>
-
-    
-
-
-  
-    <h3 class="post-title" itemprop="name">
-      <a class="post-title-link" href="/2018/01/09/分析java线程池实现原理/">分析java线程池实现原理</a>
-    </h3>
-  
-
-
-
-
-    <div class="post-content" id="post-content" itemprop="postContent">
-
-    
-        背景线程是稀缺资源，如果无限制创建会消耗大量系统资源，同时也不利于管理。线程池的出现就是为了解决这类问题。
-    
-
-        <a href="/2018/01/09/分析java线程池实现原理/" class="post-more waves-effect waves-button">
-            続きを読む…
-        </a>
-    </div>
-    
-    <div class="post-footer">
-        
-	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/concurrent/">concurrent</a></li></ul>
-
-    </div>
-    
-</article>
-
-        </li>
-    
-        <li class="post-list-item fade">
-            <article id="post-ArrayDeque中allocateElements解析" class="article-card article-type-post" itemprop="blogPost">
-
-    <div class="post-meta">
-        <time class="post-time" title="2018-01-03 21:10:59" datetime="2018-01-03T13:10:59.000Z" itemprop="datePublished">2018-01-03</time>
-
-        
-	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/java/">java</a></li></ul>
-
-
-
-    </div>
-
-    
-
-
-  
-    <h3 class="post-title" itemprop="name">
-      <a class="post-title-link" href="/2018/01/03/ArrayDeque中allocateElements解析/">ArrayDeque中allocateElements解析</a>
-    </h3>
-  
-
-
-
-
-    <div class="post-content" id="post-content" itemprop="postContent">
-
-    
-        jdk1.7源码如下
-    
-
-        <a href="/2018/01/03/ArrayDeque中allocateElements解析/" class="post-more waves-effect waves-button">
-            続きを読む…
-        </a>
-    </div>
-    
-    <div class="post-footer">
-        
-	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/queue/">queue</a></li></ul>
-
-    </div>
-    
-</article>
-
-        </li>
-    
-    </ul>
-
-    
-<nav id="page-nav">
-    <div class="inner">
-    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/">下一页</a>
-    </div>
-</nav>
-
-
-</div>
-
-        <footer class="footer">
-    <div class="top">
-        
-<p>
-    <span id="busuanzi_container_site_uv" style="display:none">
-        站点总访客数：<span id="busuanzi_value_site_uv"></span>
-    </span>
-    <span id="busuanzi_container_site_pv" style="display:none">
-        站点总访问量：<span id="busuanzi_value_site_pv"></span>
-    </span>
-</p>
-
-
-        <p>
-            
-                <span><a href="/atom.xml" target="_blank" class="rss" title="rss"><i class="icon icon-lg icon-rss"></i></a></span>
-            
-            <span>このブログの内容物は<a rel="license" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.ja">クリエイティブ・コモンズ 表示 - 非営利 - 継承 4.0 国際ライセンスの下に提供されています</a></span>
-        </p>
-    </div>
-    <div class="bottom">
-        <p><span>Fibbery &copy; 2015 - 2019</span>
-            <span>
-                
-                Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/yscoder/hexo-theme-indigo" target="_blank">indigo</a>
-            </span>
-        </p>
-    </div>
-</footer>
-
-    </main>
-    <div class="mask" id="mask"></div>
-<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
-
-
-
-<div class="global-share" id="globalShare">
-    <ul class="reset share-icons">
-      <li>
-        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://fibbery.github.io/&title=小笔记本&pic=https://fibbery.github.io/img/avatar.jpg" data-title="微博">
-          <i class="icon icon-weibo"></i>
-        </a>
-      </li>
-      <li>
-        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
-          <i class="icon icon-weixin"></i>
-        </a>
-      </li>
-      <li>
-        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://fibbery.github.io/&title=小笔记本&source=一些开发的2B笔记" data-title=" QQ">
-          <i class="icon icon-qq"></i>
-        </a>
-      </li>
-      <li>
-        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://fibbery.github.io/" data-title=" Facebook">
-          <i class="icon icon-facebook"></i>
-        </a>
-      </li>
-      <li>
-        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=小笔记本&url=https://fibbery.github.io/&via=https://fibbery.github.io" data-title=" Twitter">
-          <i class="icon icon-twitter"></i>
-        </a>
-      </li>
-      <li>
-        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://fibbery.github.io/" data-title=" Google+">
-          <i class="icon icon-google-plus"></i>
-        </a>
-      </li>
-    </ul>
- </div>
-
-
-<div class="page-modal wx-share" id="wxShare">
-    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
-    <p>扫一扫，分享到微信</p>
-    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAACWCAAAAAAZai4+AAABT0lEQVR42u3aMRKDMAxEUe5/adLS2OxKooj3u2Im4DwKZFnydcnjfozVr6s7V08NDFiwDmLd27G6R6fv51nOCQtWJEv57N3X2F+/GGDBgiVP7YYMWLBgfREgaq8BCxasTtKsLNtKgBjO5WHBOoKlV3X615/Ut2DB+nPWbQ53tuK/wIIVxtI/YGVJ1u+XysGwYIWxlI2lvu3stGpgwcpk7aVTDUs3uMCClcaq7SJr5Sd9Zliwklmd9onULKkVmGDBCmN1Dv24bdFi8RcWrKNZtaJPrc2phxJYsDJZHa6eUhvzw4IVzNIT2f7phpc0HRasGFbtKID7wdthAhasMFano6Es0q09NCxYYaxOm6TWhpECBCxYkSy3EaIfBhrI5WHBglVqlgwc9IEFC5ac7OoLcOuEICxYMSy3eOQWmPTGDCxYmayBBNfc0I4NWLBOYP0ACnoNNFqcVqkAAAAASUVORK5CYII=" alt="微信分享二维码">
-</div>
-
-
-
-
-    <script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>
-<script>
-var BLOG = { ROOT: '/', SHARE: true, REWARD: false };
-
-
-</script>
-
-<script src="//unpkg.com/hexo-theme-material-indigo@latest/js/main.min.js"></script>
-
-
-<div class="search-panel" id="search-panel">
-    <ul class="search-result" id="search-result"></ul>
-</div>
-<template id="search-tpl">
-<li class="item">
-    <a href="{path}" class="waves-block waves-effect">
-        <div class="title ellipsis" title="{title}">{title}</div>
-        <div class="flex-row flex-middle">
-            <div class="tags ellipsis">
-                {tags}
-            </div>
-            <time class="flex-col time">{date}</time>
-        </div>
-    </a>
-</li>
-</template>
-
-<script src="//unpkg.com/hexo-theme-material-indigo@latest/js/search.min.js" async></script>
-
-
-
-
-
-
-<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
-
-
-
-<script>
-(function() {
-    var OriginTitile = document.title, titleTime;
-    document.addEventListener('visibilitychange', function() {
-        if (document.hidden) {
-            document.title = '死鬼去哪里了！';
-            clearTimeout(titleTime);
-        } else {
-            document.title = '(つェ⊂)咦!又好了!';
-            titleTime = setTimeout(function() {
-                document.title = OriginTitile;
-            },2000);
-        }
-    });
+<html lang="zh-Hans">
+  <head><meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+<meta name="description" content="一些开发的2B笔记"/><link rel="alternate" href="/atom.xml" title="小笔记本"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=2.11.0" />
+<link rel="canonical" href="https://fibbery.github.io/"/>
+
+<link rel="stylesheet" type="text/css" href="/lib/fancybox/jquery.fancybox.css" /><link rel="stylesheet" type="text/css" href="/lib/nprogress/nprogress.min.css" />
+<link rel="stylesheet" type="text/css" href="/css/style.css?v=2.11.0" />
+
+<script id="baidu_push">
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
 })();
 </script>
+<script>
+  window.config = {"leancloud":{"app_id":null,"app_key":null},"toc":true,"fancybox":true,"pjax":true,"latex":false};
+</script>
 
+    <title>小笔记本</title>
+  </head>
 
+  <body><div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/." class="logo">小笔记本</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
 
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list"><a href="/">
+        <li class="mobile-menu-item">首页
+          </li>
+      </a></ul>
+</nav>
+<div class="container" id="mobile-panel">
+      <header id="header" class="header"><div class="logo-wrapper">
+  <a href="/." class="logo">小笔记本</a>
+</div>
+
+<nav class="site-navbar"><ul id="menu" class="menu"><li class="menu-item">
+          <a class="menu-item-link" href="/">
+            首页
+            </a>
+        </li>
+      </ul></nav>
+</header>
+
+      <main id="main" class="main">
+        <div class="content-wrapper">
+          <div id="content" class="content"><section id="posts" class="posts"><article class="post">
+    <header class="post-header">
+      <h1 class="post-title"><a class="post-link" href="/2019/01/09/一次insert into...on duplicate key upadte引发的问题/">一次insert into on duplicate key upadte引发的问题</a>
+        </h1>
+
+      <div class="post-meta">
+        <span class="post-time">
+          2019-01-09
+        </span><span class="post-category">
+            <a href="/categories/mysql/">mysql</a>
+            </span>
+        </div>
+    </header>
+
+    <div class="post-content"><h2 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h2><p>  最近有业务场景使用insert into … on duplicate key update进行插入更新操作，然后通过返回的affected rows来确定是进行了插入操作还是更新操作。印象中当不出现键冲突的时候affected rows应该为1（作用等同于insert into）, 而当键冲突的时候affected rows应该为2。但是实际情况是有键位冲突更新的时候affected rows返回的是1。  </p>
+          <div class="read-more">
+            <a href="/2019/01/09/一次insert into...on duplicate key upadte引发的问题/" class="read-more-link">阅读更多</a>
+          </div>
+        </div></article>
+      <article class="post">
+    <header class="post-header">
+      <h1 class="post-title"><a class="post-link" href="/2018/05/10/使用docker搭建mysql双主配置/">使用docker搭建mysql双主配置</a>
+        </h1>
+
+      <div class="post-meta">
+        <span class="post-time">
+          2018-05-10
+        </span><span class="post-category">
+            <a href="/categories/mysql/">mysql</a>
+            </span>
+        </div>
+    </header>
+
+    <div class="post-content"><h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>互联网架构需要保证数据库高可用，常见的一种方式，使用双主同步+keepalived+虚ip的方式保证数据库的可用性。依照前文<a href="https://fibbery.me/2018/05/09/%E4%BD%BF%E7%94%A8docker%E6%90%AD%E5%BB%BAmysql%E7%AE%80%E5%8D%95%E4%B8%BB%E4%BB%8E%E9%9B%86%E7%BE%A4/" target="_blank" rel="noopener">使用docker搭建mysql简单主从集群</a> 想尝试一下使用docker搭建会有什么问题</p>
+          <div class="read-more">
+            <a href="/2018/05/10/使用docker搭建mysql双主配置/" class="read-more-link">阅读更多</a>
+          </div>
+        </div></article>
+      <article class="post">
+    <header class="post-header">
+      <h1 class="post-title"><a class="post-link" href="/2018/05/09/使用docker搭建mysql简单主从集群/">使用docker搭建mysql简单主从集群</a>
+        </h1>
+
+      <div class="post-meta">
+        <span class="post-time">
+          2018-05-09
+        </span><span class="post-category">
+            <a href="/categories/mysql/">mysql</a>
+            </span>
+        </div>
+    </header>
+
+    <div class="post-content"><h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>最近对mysql集群搭建以及后期如何在线上进行拆分和迁移产生了兴趣，所以初步想在自己本机通过docker搭建一个简单的主从集群来满足一下好奇心</p>
+          <div class="read-more">
+            <a href="/2018/05/09/使用docker搭建mysql简单主从集群/" class="read-more-link">阅读更多</a>
+          </div>
+        </div></article>
+      <article class="post">
+    <header class="post-header">
+      <h1 class="post-title"><a class="post-link" href="/2018/03/06/Java序列化的一些了解/">Java序列化的一些了解</a>
+        </h1>
+
+      <div class="post-meta">
+        <span class="post-time">
+          2018-03-06
+        </span><span class="post-category">
+            <a href="/categories/java/">java</a>
+            </span>
+        </div>
+    </header>
+
+    <div class="post-content"><h2 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h2><p>通常来说序列化和反序列化通常是一起的。我们常见的就是你只要将类实现Serializable接口，就能将该类的对象序列化二进制文件，同时能通过反序列化将二进制文件还原成对象。<br>
+          <div class="read-more">
+            <a href="/2018/03/06/Java序列化的一些了解/" class="read-more-link">阅读更多</a>
+          </div>
+        </div></article>
+      <article class="post">
+    <header class="post-header">
+      <h1 class="post-title"><a class="post-link" href="/2018/03/03/Dubbo通信实现/">Dubbo通信实现</a>
+        </h1>
+
+      <div class="post-meta">
+        <span class="post-time">
+          2018-03-03
+        </span><span class="post-category">
+            <a href="/categories/java/">java</a>
+            </span>
+        </div>
+    </header>
+
+    <div class="post-content"><h2 id="前提"><a href="#前提" class="headerlink" title="前提"></a>前提</h2><p>基于dubbo默认通讯服务器Netty来解析服务端和客户端如何通讯<br>
+          <div class="read-more">
+            <a href="/2018/03/03/Dubbo通信实现/" class="read-more-link">阅读更多</a>
+          </div>
+        </div></article>
+      <article class="post">
+    <header class="post-header">
+      <h1 class="post-title"><a class="post-link" href="/2018/02/06/OpenSSL生成根证书CA/">OpenSSL生成根证书CA</a>
+        </h1>
+
+      <div class="post-meta">
+        <span class="post-time">
+          2018-02-06
+        </span><span class="post-category">
+            <a href="/categories/其他/">其他</a>
+            </span>
+        </div>
+    </header>
+
+    <div class="post-content"><h2 id="准备环境"><a href="#准备环境" class="headerlink" title="准备环境"></a>准备环境</h2><p>本机Mac，所以只讨论Mac环境下的生成方法。<br>需要安装openssl，如果没有可以使用homebrew安装。<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">brew install openssl</span><br></pre></td></tr></table></figure></p>
+          <div class="read-more">
+            <a href="/2018/02/06/OpenSSL生成根证书CA/" class="read-more-link">阅读更多</a>
+          </div>
+        </div></article>
+      <article class="post">
+    <header class="post-header">
+      <h1 class="post-title"><a class="post-link" href="/2018/01/19/java读取openssl创建的公私钥/">java读取openssl创建的公私钥</a>
+        </h1>
+
+      <div class="post-meta">
+        <span class="post-time">
+          2018-01-19
+        </span><span class="post-category">
+            <a href="/categories/其他/">其他</a>
+            </span>
+        </div>
+    </header>
+
+    <div class="post-content"><p>最近在考虑使用Netty搭建HTTP/HTTPS代理服务器，遇到了openssl密钥读取问题，下面概述步骤。<br>选用openssl生成密钥的初衷是netty的SslContextBuilder对其支持比较直接，相较于使用keytool更为容易读取。</p>
+          <div class="read-more">
+            <a href="/2018/01/19/java读取openssl创建的公私钥/" class="read-more-link">阅读更多</a>
+          </div>
+        </div></article>
+      <article class="post">
+    <header class="post-header">
+      <h1 class="post-title"><a class="post-link" href="/2018/01/15/Dubbo中SPI拓展机制的实现/">Dubbo中SPI拓展机制的实现</a>
+        </h1>
+
+      <div class="post-meta">
+        <span class="post-time">
+          2018-01-15
+        </span><span class="post-category">
+            <a href="/categories/java/">java</a>
+            </span>
+        </div>
+    </header>
+
+    <div class="post-content"><p>初步说明下java原生的spi拓展加载机制：</p>
+<blockquote>
+<p>扫描META-INF/services下面的所有文件，文件都是使用接口或者抽象类名字作为文件名，具体实现类作为文件内容构成，在使用的时候只能通过遍历来实现查找和实例化，有可能会一次性把所有的实现都实例化，造成不必要的浪费。</p>
+</blockquote>
+          <div class="read-more">
+            <a href="/2018/01/15/Dubbo中SPI拓展机制的实现/" class="read-more-link">阅读更多</a>
+          </div>
+        </div></article>
+      <article class="post">
+    <header class="post-header">
+      <h1 class="post-title"><a class="post-link" href="/2018/01/09/分析java线程池实现原理/">分析java线程池实现原理</a>
+        </h1>
+
+      <div class="post-meta">
+        <span class="post-time">
+          2018-01-09
+        </span><span class="post-category">
+            <a href="/categories/java/">java</a>
+            </span>
+        </div>
+    </header>
+
+    <div class="post-content"><h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>线程是稀缺资源，如果无限制创建会消耗大量系统资源，同时也不利于管理。线程池的出现就是为了解决这类问题。</p>
+          <div class="read-more">
+            <a href="/2018/01/09/分析java线程池实现原理/" class="read-more-link">阅读更多</a>
+          </div>
+        </div></article>
+      <article class="post">
+    <header class="post-header">
+      <h1 class="post-title"><a class="post-link" href="/2018/01/03/ArrayDeque中allocateElements解析/">ArrayDeque中allocateElements解析</a>
+        </h1>
+
+      <div class="post-meta">
+        <span class="post-time">
+          2018-01-03
+        </span><span class="post-category">
+            <a href="/categories/java/">java</a>
+            </span>
+        </div>
+    </header>
+
+    <div class="post-content"><p>jdk1.7源码如下</p>
+          <div class="read-more">
+            <a href="/2018/01/03/ArrayDeque中allocateElements解析/" class="read-more-link">阅读更多</a>
+          </div>
+        </div></article>
+      <nav class="pagination"><a class="next" href="/page/2/">
+        <span class="next-text">下一页</span>
+        <i class="iconfont icon-right"></i>
+      </a>
+    </nav></section></div></div>
+      </main>
+
+      <footer id="footer" class="footer"><div class="social-links"><a href="mailto:your@email.com" class="iconfont icon-email" title="email"></a>
+        <a href="https://github.com/ahonn" class="iconfont icon-github" title="github"></a>
+        <a href="/atom.xml" class="iconfont icon-rss" title="rss"></a>
+    </div><div class="copyright">
+  <span class="power-by">
+    由 <a class="hexo-link" href="https://hexo.io/">Hexo</a> 强力驱动
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    主题 - 
+    <a class="theme-link" href="https://github.com/ahonn/hexo-theme-even">Even</a>
+  </span>
+
+  <span class="copyright-year">&copy;2015 - 2019<span class="heart">
+      <i class="iconfont icon-heart"></i>
+    </span>
+    <span class="author">Fibbery</span>
+  </span>
+</div>
+</footer>
+
+      <div class="back-to-top" id="back-to-top">
+        <i class="iconfont icon-up"></i>
+      </div>
+    </div><script type="text/javascript" src="/lib/jquery/jquery.min.js"></script>
+  <script type="text/javascript" src="/lib/slideout/slideout.js"></script>
+  <script type="text/javascript" src="/lib/fancybox/jquery.fancybox.pack.js"></script>
+  <script type="text/javascript" src="/lib/pjax/jquery.pjax.min.js"></script>
+  <script type="text/javascript" src="/lib/nprogress/nprogress.min.js"></script>
+  <script type="text/javascript" src="/js/src/even.js?v=2.11.0"></script>
 </body>
 </html>

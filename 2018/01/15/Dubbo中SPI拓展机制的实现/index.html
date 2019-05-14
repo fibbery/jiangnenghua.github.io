@@ -1,194 +1,97 @@
 <!DOCTYPE html>
-<html>
-<head><meta name="generator" content="Hexo 3.8.0">
-    
-
-    
-
-    
+<html lang="zh-Hans">
+  <head><meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
 
 
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
 
-    <meta charset="utf-8">
-    
-    
-    
-    
-    <title>Dubbo中SPI拓展机制的实现 | 小笔记本 | 好风凭借力，送我上青云</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-    
-    <meta name="theme-color" content="#3F51B5">
-    
-    
-    <meta name="keywords" content="dubbo,spi">
-    <meta name="description" content="初步说明下java原生的spi拓展加载机制：  扫描META-INF/services下面的所有文件，文件都是使用接口或者抽象类名字作为文件名，具体实现类作为文件内容构成，在使用的时候只能通过遍历来实现查找和实例化，有可能会一次性把所有的实现都实例化，造成不必要的浪费。">
-<meta name="keywords" content="dubbo,spi">
-<meta property="og:type" content="article">
-<meta property="og:title" content="Dubbo中SPI拓展机制的实现">
-<meta property="og:url" content="https://fibbery.github.io/2018/01/15/Dubbo中SPI拓展机制的实现/index.html">
-<meta property="og:site_name" content="小笔记本">
-<meta property="og:description" content="初步说明下java原生的spi拓展加载机制：  扫描META-INF/services下面的所有文件，文件都是使用接口或者抽象类名字作为文件名，具体实现类作为文件内容构成，在使用的时候只能通过遍历来实现查找和实例化，有可能会一次性把所有的实现都实例化，造成不必要的浪费。">
-<meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="https://fibbery.github.io/assets/blogImg/Dubbo-ExtensonLoader获取拓展点实现流程.png">
-<meta property="og:image" content="https://fibbery.github.io/assets/blogImg/Dubbo的ExtensionLoader获取适配类流程.png">
-<meta property="og:updated_time" content="2019-03-04T01:55:25.542Z">
-<meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Dubbo中SPI拓展机制的实现">
-<meta name="twitter:description" content="初步说明下java原生的spi拓展加载机制：  扫描META-INF/services下面的所有文件，文件都是使用接口或者抽象类名字作为文件名，具体实现类作为文件内容构成，在使用的时候只能通过遍历来实现查找和实例化，有可能会一次性把所有的实现都实例化，造成不必要的浪费。">
-<meta name="twitter:image" content="https://fibbery.github.io/assets/blogImg/Dubbo-ExtensonLoader获取拓展点实现流程.png">
-    
-        <link rel="alternate" type="application/atom+xml" title="小笔记本" href="/atom.xml">
-    
-    <link rel="shortcut icon" href="/img/favicon.ico">
-    <link rel="stylesheet" href="//unpkg.com/hexo-theme-material-indigo@latest/css/style.css">
-    <script>window.lazyScripts=[]</script>
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
 
-    <!-- custom head -->
-    
+<meta name="description" content="Dubbo中SPI拓展机制的实现"/><meta name="keywords" content="dubbo, spi, 小笔记本" /><link rel="alternate" href="/atom.xml" title="小笔记本"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=2.11.0" />
+<link rel="canonical" href="https://fibbery.github.io/2018/01/15/Dubbo中SPI拓展机制的实现/"/>
 
-</head>
+<link rel="stylesheet" type="text/css" href="/lib/fancybox/jquery.fancybox.css" /><link rel="stylesheet" type="text/css" href="/lib/nprogress/nprogress.min.css" />
+<link rel="stylesheet" type="text/css" href="/css/style.css?v=2.11.0" />
 
-<body>
-    <div id="loading" class="active"></div>
+<script id="baidu_push">
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+<script>
+  window.config = {"leancloud":{"app_id":null,"app_key":null},"toc":true,"fancybox":true,"pjax":true,"latex":false};
+</script>
 
-    <aside id="menu" class="hide">
-  <div class="inner flex-row-vertical">
-    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
-        <i class="icon icon-lg icon-close"></i>
-    </a>
-    <div class="brand-wrap" style="background-image:url(/)">
-      <div class="brand">
-        <a href="/" class="avatar waves-effect waves-circle waves-light">
-          <img src="/img/avatar.jpg">
-        </a>
-        <hgroup class="introduce">
-          <h5 class="nickname">Fibbery</h5>
-          <a href="mailto:568263091@qq.com" title="568263091@qq.com" class="mail">568263091@qq.com</a>
-        </hgroup>
-      </div>
-    </div>
-    <div class="scroll-wrap flex-col">
-      <ul class="nav">
-        
-            <li class="waves-block waves-effect">
-              <a href="/">
-                <i class="icon icon-lg icon-home"></i>
-                主页
-              </a>
-            </li>
-        
-            <li class="waves-block waves-effect">
-              <a href="/archives">
-                <i class="icon icon-lg icon-archives"></i>
-                Archives
-              </a>
-            </li>
-        
-            <li class="waves-block waves-effect">
-              <a href="/tags">
-                <i class="icon icon-lg icon-tags"></i>
-                Tags
-              </a>
-            </li>
-        
-            <li class="waves-block waves-effect">
-              <a href="/categories">
-                <i class="icon icon-lg icon-th-list"></i>
-                Categories
-              </a>
-            </li>
-        
-            <li class="waves-block waves-effect">
-              <a href="https://github.com/fibbery" target="_blank">
-                <i class="icon icon-lg icon-github"></i>
-                Github
-              </a>
-            </li>
-        
-      </ul>
-    </div>
+    <title>Dubbo中SPI拓展机制的实现 - 小笔记本</title>
+  </head>
+
+  <body><div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/." class="logo">小笔记本</a>
   </div>
-</aside>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
 
-    <main id="main">
-        <header class="top-header" id="header">
-    <div class="flex-row">
-        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
-          <i class="icon icon-lg icon-navicon"></i>
-        </a>
-        <div class="flex-col header-title ellipsis">Dubbo中SPI拓展机制的实现</div>
-        
-        <div class="search-wrap" id="search-wrap">
-            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
-                <i class="icon icon-lg icon-chevron-left"></i>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list"><a href="/">
+        <li class="mobile-menu-item">首页
+          </li>
+      </a></ul>
+</nav>
+<div class="container" id="mobile-panel">
+      <header id="header" class="header"><div class="logo-wrapper">
+  <a href="/." class="logo">小笔记本</a>
+</div>
+
+<nav class="site-navbar"><ul id="menu" class="menu"><li class="menu-item">
+          <a class="menu-item-link" href="/">
+            首页
             </a>
-            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="検索">
-            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search">
-                <i class="icon icon-lg icon-search"></i>
-            </a>
-        </div>
-        
-        
-        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menuShare">
-            <i class="icon icon-lg icon-share-alt"></i>
-        </a>
-        
-    </div>
-</header>
-<header class="content-header post-header">
-
-    <div class="container fade-scale">
-        <h1 class="title">Dubbo中SPI拓展机制的实现</h1>
-        <h5 class="subtitle">
-            
-                <time datetime="2018-01-15T15:09:56.000Z" itemprop="datePublished" class="page-time">
-  2018-01-15
-</time>
-
-
-	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/java/">java</a></li></ul>
-
-            
-        </h5>
-    </div>
-
-    
-
-
+        </li>
+      </ul></nav>
 </header>
 
+      <main id="main" class="main">
+        <div class="content-wrapper">
+          <div id="content" class="content"><article class="post">
+    <header class="post-header">
+      <h1 class="post-title">Dubbo中SPI拓展机制的实现
+        </h1>
 
-<div class="container body-wrap">
-    
-    <aside class="post-widget">
-        <nav class="post-toc-wrap post-toc-shrink" id="post-toc">
-            <h4>TOC</h4>
-            <ol class="post-toc"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#拓展点自动包装"><span class="post-toc-number">1.</span> <span class="post-toc-text">拓展点自动包装</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#拓展点自适应"><span class="post-toc-number">2.</span> <span class="post-toc-text">拓展点自适应</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#扩展点自动注入"><span class="post-toc-number">3.</span> <span class="post-toc-text">扩展点自动注入</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#拓展点自动激活"><span class="post-toc-number">4.</span> <span class="post-toc-text">拓展点自动激活</span></a></li></ol>
-        </nav>
-    </aside>
-
-
-<article id="post-Dubbo中SPI拓展机制的实现" class="post-article article-type-post fade" itemprop="blogPost">
-
-    <div class="post-card">
-        <h1 class="post-card-title">Dubbo中SPI拓展机制的实现</h1>
-        <div class="post-meta">
-            <time class="post-time" title="2018-01-15 23:09:56" datetime="2018-01-15T15:09:56.000Z" itemprop="datePublished">2018-01-15</time>
-
-            
-	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/java/">java</a></li></ul>
-
-
-
-            
-<span id="busuanzi_container_page_pv" title="文章总阅读量" style="display:none">
-    <i class="icon icon-eye icon-pr"></i><span id="busuanzi_value_page_pv"></span>
-</span>
-
-
+      <div class="post-meta">
+        <span class="post-time">
+          2018-01-15
+        </span><span class="post-category">
+            <a href="/categories/java/">java</a>
+            </span>
         </div>
-        <div class="post-content" id="post-content" itemprop="postContent">
-            <p>初步说明下java原生的spi拓展加载机制：</p>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">文章目录</h2>
+    <div class="post-toc-content">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#拓展点自动包装"><span class="toc-text">拓展点自动包装</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#拓展点自适应"><span class="toc-text">拓展点自适应</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#扩展点自动注入"><span class="toc-text">扩展点自动注入</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#拓展点自动激活"><span class="toc-text">拓展点自动激活</span></a></li></ol>
+    </div>
+  </div><div class="post-content"><p>初步说明下java原生的spi拓展加载机制：</p>
 <blockquote>
 <p>扫描META-INF/services下面的所有文件，文件都是使用接口或者抽象类名字作为文件名，具体实现类作为文件内容构成，在使用的时候只能通过遍历来实现查找和实例化，有可能会一次性把所有的实现都实例化，造成不必要的浪费。</p>
 </blockquote>
@@ -201,13 +104,7 @@
 <p>通过上图流程可以分析出拓展点的以下属性</p>
 <h3 id="拓展点自动包装"><a href="#拓展点自动包装" class="headerlink" title="拓展点自动包装"></a>拓展点自动包装</h3><p>自动包装拓展的wrapper类也是拓展点的实现类，ExtensionLoader在加载拓展点的时候，会将拥有该类型的构造函数的拓展点当做wrapper类。代码如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//代码点ExtensionLoader.loadFile()</span></span><br><span class="line">clazz.getConstructor(type);</span><br><span class="line">Set&lt;Class&lt;?&gt;&gt; wrappers = cacheWrapperClasses;</span><br><span class="line"><span class="keyword">if</span>(wrappers == <span class="keyword">null</span>)&#123;</span><br><span class="line">  cacheWrapperClasses = <span class="keyword">new</span> ConcurrentHashSet&lt;Class&lt;?&gt;&gt;();</span><br><span class="line">  wrappers = cacheWrapperClasses;</span><br><span class="line">&#125;</span><br><span class="line">wrappers.add(clazz);</span><br></pre></td></tr></table></figure></p>
 <p>当使用ExtensionLoader返回拓展点时，返回的其实是wrapper类的实例，该实例持有实际的拓展点实现。<br>这种拓展类可以有很多个，可以根据实际需要新增。<br>所以可以把所有拓展点的公共逻辑都置于wrapper类中，类似于aop，wrapper代理了实际需要的拓展点。</p>
-<h3 id="拓展点自适应"><a href="#拓展点自适应" class="headerlink" title="拓展点自适应"></a>拓展点自适应</h3><p>很多时候拓展点是有多个实现的，我们需要给定一个参数来让使用者决定使用哪个拓展点，在dubbo中我们是使用com.alibaba.dubbo.common.URL来传递这样一个信息。因此，ExtensionLoader会有一个唯一的AdptiveClass(适配类)，然后通过URL这样一个变量容器来决定使用哪个具体的拓展点实现。当然，如果一个拓展点只有一个实现类，是不需要AdptiveClass的。获取适配类的方法为getAdaptiveExtension流程如下：<br><figure class="image-bubble">
-                <div class="img-lightbox">
-                    <div class="overlay"></div>
-                    <img src="/assets/blogImg/Dubbo的ExtensionLoader获取适配类流程.png" alt="Dubbo的ExtensionLoader获取适配类流程" title>
-                </div>
-                <div class="image-caption">Dubbo的ExtensionLoader获取适配类流程</div>
-            </figure><br>所以，要让拓展点支持自适应，需要满足以下条件：</p>
+<h3 id="拓展点自适应"><a href="#拓展点自适应" class="headerlink" title="拓展点自适应"></a>拓展点自适应</h3><p>很多时候拓展点是有多个实现的，我们需要给定一个参数来让使用者决定使用哪个拓展点，在dubbo中我们是使用com.alibaba.dubbo.common.URL来传递这样一个信息。因此，ExtensionLoader会有一个唯一的AdptiveClass(适配类)，然后通过URL这样一个变量容器来决定使用哪个具体的拓展点实现。当然，如果一个拓展点只有一个实现类，是不需要AdptiveClass的。获取适配类的方法为getAdaptiveExtension流程如下：<br><img src="/assets/blogImg/Dubbo的ExtensionLoader获取适配类流程.png" alt="Dubbo的ExtensionLoader获取适配类流程"><br>所以，要让拓展点支持自适应，需要满足以下条件：</p>
 <ol>
 <li>拓展点实现类有@Adaptive注解</li>
 <li>拓展点接口方法有@Adaptive注解并且对应接口方法参数是com.alibaba.dubbo.common.URL或者包含com.alibaba.dubbo.common.URL属性<br>使用适配类依赖注入的demo如下：<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@SPI</span>(<span class="string">"impl1"</span>)</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">SimpleExt</span> </span>&#123;</span><br><span class="line">    <span class="comment">// @Adaptive example, do not specify a explicit key.</span></span><br><span class="line">    <span class="meta">@Adaptive</span></span><br><span class="line">    <span class="function">String <span class="title">echo</span><span class="params">(URL url, String s)</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Adaptive</span>(&#123;<span class="string">"key1"</span>, <span class="string">"key2"</span>&#125;)</span><br><span class="line">    <span class="function">String <span class="title">yell</span><span class="params">(URL url, String s)</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// no @Adaptive</span></span><br><span class="line">    <span class="function">String <span class="title">bang</span><span class="params">(URL url, <span class="keyword">int</span> i)</span></span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SimpleExtImpl1</span> <span class="keyword">implements</span> <span class="title">SimpleExt</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">echo</span><span class="params">(URL url, String s)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">"Ext1Impl1-echo"</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">yell</span><span class="params">(URL url, String s)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">"Ext1Impl1-yell"</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">bang</span><span class="params">(URL url, <span class="keyword">int</span> i)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">"bang1"</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SimpleExtImpl2</span> <span class="keyword">implements</span> <span class="title">SimpleExt</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">echo</span><span class="params">(URL url, String s)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">"Ext1Impl2-echo"</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">yell</span><span class="params">(URL url, String s)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">"Ext1Impl2-yell"</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">bang</span><span class="params">(URL url, <span class="keyword">int</span> i)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">"bang2"</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//测试demo如下</span></span><br><span class="line">   <span class="meta">@Test</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">test_getAdaptiveExtension_defaultAdaptiveKey</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        &#123;</span><br><span class="line">            SimpleExt ext = ExtensionLoader.getExtensionLoader(SimpleExt.class).getAdaptiveExtension();</span><br><span class="line"></span><br><span class="line">            Map&lt;String, String&gt; map = <span class="keyword">new</span> HashMap&lt;String, String&gt;();</span><br><span class="line">            URL url = <span class="keyword">new</span> URL(<span class="string">"p1"</span>, <span class="string">"1.2.3.4"</span>, <span class="number">1010</span>, <span class="string">"path1"</span>, map);</span><br><span class="line"></span><br><span class="line">            String echo = ext.echo(url, <span class="string">"haha"</span>);</span><br><span class="line">            assertEquals(<span class="string">"Ext1Impl1-echo"</span>, echo);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        &#123;</span><br><span class="line">            SimpleExt ext = ExtensionLoader.getExtensionLoader(SimpleExt.class).getAdaptiveExtension();</span><br><span class="line"></span><br><span class="line">            Map&lt;String, String&gt; map = <span class="keyword">new</span> HashMap&lt;String, String&gt;();</span><br><span class="line">            map.put(<span class="string">"simple.ext"</span>, <span class="string">"impl2"</span>);</span><br><span class="line">            URL url = <span class="keyword">new</span> URL(<span class="string">"p1"</span>, <span class="string">"1.2.3.4"</span>, <span class="number">1010</span>, <span class="string">"path1"</span>, map);</span><br><span class="line"></span><br><span class="line">            String echo = ext.echo(url, <span class="string">"haha"</span>);</span><br><span class="line">            assertEquals(<span class="string">"Ext1Impl2-echo"</span>, echo);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
@@ -231,280 +128,69 @@
 <li>after：相对顺序(在某个拓展之后)</li>
 </ul>
 
-        </div>
-
-        <blockquote class="post-copyright">
-    
-    <div class="content">
+      </div>
+      <div class="post-copyright">
+    <p class="copyright-item">
+      <span>原文作者: </span>
+      <a href="https://fibbery.github.io">Fibbery</a>
+    </p>
+    <p class="copyright-item">
+      <span>原文链接: </span>
+      <a href="https://fibbery.github.io/2018/01/15/Dubbo中SPI拓展机制的实现/">https://fibbery.github.io/2018/01/15/Dubbo中SPI拓展机制的实现/</a>
+    </p>
+    <p class="copyright-item">
+      <span>许可协议: </span><a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/" target="_blank">知识共享署名-非商业性使用 4.0 国际许可协议</a>
+    </p>
+  </div>
+      <footer class="post-footer">
+        <div class="post-tags">
+            <a href="/tags/dubbo/">dubbo</a>
+            <a href="/tags/spi/">spi</a>
+            </div>
         
-<span class="post-time">
-    最終更新：<time datetime="2019-03-04T01:55:25.542Z" itemprop="dateUpdated">2019-03-04 09:55:25</time>
-</span><br>
-
-
-        
-        这里可以写作者留言，标签和 hexo 中所有变量及辅助函数等均可调用，示例：<a href="/2018/01/15/Dubbo中SPI拓展机制的实现/" target="_blank" rel="external">https://fibbery.github.io/2018/01/15/Dubbo中SPI拓展机制的实现/</a>
-        
-    </div>
-    
-    <footer>
-        <a href="https://fibbery.github.io">
-            <img src="/img/avatar.jpg" alt="Fibbery">
-            Fibbery
-        </a>
-    </footer>
-</blockquote>
-
-        
-
-
-        <div class="post-footer">
-            
-	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/dubbo/">dubbo</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/spi/">spi</a></li></ul>
-
-
-            
-<div class="page-share-wrap">
-    
-
-<div class="page-share" id="pageShare">
-    <ul class="reset share-icons">
-      <li>
-        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://fibbery.github.io/2018/01/15/Dubbo中SPI拓展机制的实现/&title=《Dubbo中SPI拓展机制的实现》 — 小笔记本&pic=https://fibbery.github.io/img/avatar.jpg" data-title="微博">
-          <i class="icon icon-weibo"></i>
-        </a>
-      </li>
-      <li>
-        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
-          <i class="icon icon-weixin"></i>
-        </a>
-      </li>
-      <li>
-        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://fibbery.github.io/2018/01/15/Dubbo中SPI拓展机制的实现/&title=《Dubbo中SPI拓展机制的实现》 — 小笔记本&source=初步说明下java原生的spi拓展加载机制：
-
-扫描META-INF/services下面的所有文件，文件都是使用接口或者抽象类名字作为文件名，具体实现类..." data-title=" QQ">
-          <i class="icon icon-qq"></i>
-        </a>
-      </li>
-      <li>
-        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://fibbery.github.io/2018/01/15/Dubbo中SPI拓展机制的实现/" data-title=" Facebook">
-          <i class="icon icon-facebook"></i>
-        </a>
-      </li>
-      <li>
-        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《Dubbo中SPI拓展机制的实现》 — 小笔记本&url=https://fibbery.github.io/2018/01/15/Dubbo中SPI拓展机制的实现/&via=https://fibbery.github.io" data-title=" Twitter">
-          <i class="icon icon-twitter"></i>
-        </a>
-      </li>
-      <li>
-        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://fibbery.github.io/2018/01/15/Dubbo中SPI拓展机制的实现/" data-title=" Google+">
-          <i class="icon icon-google-plus"></i>
-        </a>
-      </li>
-    </ul>
- </div>
-
-
-
-    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
-        <i class="icon icon-share-alt icon-lg"></i>
-    </a>
-</div>
-
-
-
-        </div>
-    </div>
-
-    
-<nav class="post-nav flex-row flex-justify-between">
-  
-    <div class="waves-block waves-effect prev">
-      <a href="/2018/01/19/java读取openssl创建的公私钥/" id="post-prev" class="post-nav-link">
-        <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
-        <h4 class="title">java读取openssl创建的公私钥</h4>
+        <nav class="post-nav"><a class="prev" href="/2018/01/19/java读取openssl创建的公私钥/">
+        <i class="iconfont icon-left"></i>
+        <span class="prev-text nav-default">java读取openssl创建的公私钥</span>
+        <span class="prev-text nav-mobile">上一篇</span>
       </a>
-    </div>
-  
-
-  
-    <div class="waves-block waves-effect next">
-      <a href="/2018/01/09/分析java线程池实现原理/" id="post-next" class="post-nav-link">
-        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
-        <h4 class="title">分析java线程池实现原理</h4>
+    <a class="next" href="/2018/01/09/分析java线程池实现原理/">
+        <span class="next-text nav-default">分析java线程池实现原理</span>
+        <span class="prev-text nav-mobile">下一篇</span>
+        <i class="iconfont icon-right"></i>
       </a>
-    </div>
-  
-</nav>
+    </nav></footer>
+    </article></div><div class="comments" id="comments"></div></div>
+      </main>
 
+      <footer id="footer" class="footer"><div class="social-links"><a href="mailto:your@email.com" class="iconfont icon-email" title="email"></a>
+        <a href="https://github.com/ahonn" class="iconfont icon-github" title="github"></a>
+        <a href="/atom.xml" class="iconfont icon-rss" title="rss"></a>
+    </div><div class="copyright">
+  <span class="power-by">
+    由 <a class="hexo-link" href="https://hexo.io/">Hexo</a> 强力驱动
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    主题 - 
+    <a class="theme-link" href="https://github.com/ahonn/hexo-theme-even">Even</a>
+  </span>
 
-
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-</article>
-
-
-
+  <span class="copyright-year">&copy;2015 - 2019<span class="heart">
+      <i class="iconfont icon-heart"></i>
+    </span>
+    <span class="author">Fibbery</span>
+  </span>
 </div>
-
-        <footer class="footer">
-    <div class="top">
-        
-<p>
-    <span id="busuanzi_container_site_uv" style="display:none">
-        站点总访客数：<span id="busuanzi_value_site_uv"></span>
-    </span>
-    <span id="busuanzi_container_site_pv" style="display:none">
-        站点总访问量：<span id="busuanzi_value_site_pv"></span>
-    </span>
-</p>
-
-
-        <p>
-            
-                <span><a href="/atom.xml" target="_blank" class="rss" title="rss"><i class="icon icon-lg icon-rss"></i></a></span>
-            
-            <span>このブログの内容物は<a rel="license" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.ja">クリエイティブ・コモンズ 表示 - 非営利 - 継承 4.0 国際ライセンスの下に提供されています</a></span>
-        </p>
-    </div>
-    <div class="bottom">
-        <p><span>Fibbery &copy; 2015 - 2019</span>
-            <span>
-                
-                Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/yscoder/hexo-theme-indigo" target="_blank">indigo</a>
-            </span>
-        </p>
-    </div>
 </footer>
 
-    </main>
-    <div class="mask" id="mask"></div>
-<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
-
-
-
-<div class="global-share" id="globalShare">
-    <ul class="reset share-icons">
-      <li>
-        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://fibbery.github.io/2018/01/15/Dubbo中SPI拓展机制的实现/&title=《Dubbo中SPI拓展机制的实现》 — 小笔记本&pic=https://fibbery.github.io/img/avatar.jpg" data-title="微博">
-          <i class="icon icon-weibo"></i>
-        </a>
-      </li>
-      <li>
-        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
-          <i class="icon icon-weixin"></i>
-        </a>
-      </li>
-      <li>
-        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://fibbery.github.io/2018/01/15/Dubbo中SPI拓展机制的实现/&title=《Dubbo中SPI拓展机制的实现》 — 小笔记本&source=初步说明下java原生的spi拓展加载机制：
-
-扫描META-INF/services下面的所有文件，文件都是使用接口或者抽象类名字作为文件名，具体实现类..." data-title=" QQ">
-          <i class="icon icon-qq"></i>
-        </a>
-      </li>
-      <li>
-        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://fibbery.github.io/2018/01/15/Dubbo中SPI拓展机制的实现/" data-title=" Facebook">
-          <i class="icon icon-facebook"></i>
-        </a>
-      </li>
-      <li>
-        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《Dubbo中SPI拓展机制的实现》 — 小笔记本&url=https://fibbery.github.io/2018/01/15/Dubbo中SPI拓展机制的实现/&via=https://fibbery.github.io" data-title=" Twitter">
-          <i class="icon icon-twitter"></i>
-        </a>
-      </li>
-      <li>
-        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://fibbery.github.io/2018/01/15/Dubbo中SPI拓展机制的实现/" data-title=" Google+">
-          <i class="icon icon-google-plus"></i>
-        </a>
-      </li>
-    </ul>
- </div>
-
-
-<div class="page-modal wx-share" id="wxShare">
-    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
-    <p>扫一扫，分享到微信</p>
-    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAN4AAADeCAAAAAB3DOFrAAACr0lEQVR42u3aQW7jMAwF0Nz/0hmgqxm00fwvSmkWT6vCtS09L0KC5OMRr+fXSq78vdb3f3/q+53rdx5beHh4eFtHf7Xao68ZOTXZZX1mPDw8vNu85EDrIyabrT9ceyUJYHh4eHi/y8t/ptvAsz7JXvjBw8PD+3xeXhPIw88HBQY8PDy8rWLE/OhJOp6/4XCtBQ8PDy/mtQ2wT/j7Yn8PDw8Pb9BVz5thbQFir5FWnxYPDw/vAm9dhM0b/Ot0Nvlve6XYBQ8PD+8or23St3e2ja75aMI/z+Lh4eFd5k0aUfeKsPmpfrgHDw8P7wLvXuVzr9baDlfVw1t4eHh4Y15+oMmPfjs+tXeq/1RZ8PDw8A7x8jJrAsibYXvl2rblhoeHh3eD1xZt9xpmedqdv+Fwto6Hh4dX8pIrbeO/HSNoS8aRAg8PD++NvDxtndyTN8ba0IKHh4f3fl5beG3HsyZFiiK5x8PDw7vM29vgxidoBxFePoWHh4d3gTfHTILBZMeikYaHh4d3lNc2sfaQ7bDUZOiqGB3Aw8PDG/PeOUAw6fsXCT0eHh7eZV67ZV4yyNPuvUBSzJTh4eHhjXkJOB9+Sj5Enpq3Aw1R+MHDw8Mb8/LyaF48zYelctheGMPDw8O7wZuMBbRtqrPBoBg4wMPDwzvKa4+ep8j52/LCcZug4+Hh4d3mnWrhz9degHm0sQUPDw9vi3e2WbUuNLSN//bjRkg8PDy8Me9ZrkmRIgkheSk5+ZR4eHh4N3iTLlIObkNF/ra9QIKHh4c35yUb52NPe+MF7fhXUkTGw8PDu81rCxM5IE+LTxWIX05G4OHh4b2dtzduNSlnTIoXeHh4eJ/GO5bybpVii0+Jh4eHd403SYUnAwF7zxbhBA8PD+8Cb94Aa0PCpDG2OU2Gh4eHd4b3B1Dykpd93s99AAAAAElFTkSuQmCC" alt="微信分享二维码">
-</div>
-
-
-
-
-    <script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>
-<script>
-var BLOG = { ROOT: '/', SHARE: true, REWARD: false };
-
-
-</script>
-
-<script src="//unpkg.com/hexo-theme-material-indigo@latest/js/main.min.js"></script>
-
-
-<div class="search-panel" id="search-panel">
-    <ul class="search-result" id="search-result"></ul>
-</div>
-<template id="search-tpl">
-<li class="item">
-    <a href="{path}" class="waves-block waves-effect">
-        <div class="title ellipsis" title="{title}">{title}</div>
-        <div class="flex-row flex-middle">
-            <div class="tags ellipsis">
-                {tags}
-            </div>
-            <time class="flex-col time">{date}</time>
-        </div>
-    </a>
-</li>
-</template>
-
-<script src="//unpkg.com/hexo-theme-material-indigo@latest/js/search.min.js" async></script>
-
-
-
-
-
-
-<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
-
-
-
-<script>
-(function() {
-    var OriginTitile = document.title, titleTime;
-    document.addEventListener('visibilitychange', function() {
-        if (document.hidden) {
-            document.title = '死鬼去哪里了！';
-            clearTimeout(titleTime);
-        } else {
-            document.title = '(つェ⊂)咦!又好了!';
-            titleTime = setTimeout(function() {
-                document.title = OriginTitile;
-            },2000);
-        }
-    });
-})();
-</script>
-
-
-
+      <div class="back-to-top" id="back-to-top">
+        <i class="iconfont icon-up"></i>
+      </div>
+    </div><script type="text/javascript" src="/lib/jquery/jquery.min.js"></script>
+  <script type="text/javascript" src="/lib/slideout/slideout.js"></script>
+  <script type="text/javascript" src="/lib/fancybox/jquery.fancybox.pack.js"></script>
+  <script type="text/javascript" src="/lib/pjax/jquery.pjax.min.js"></script>
+  <script type="text/javascript" src="/lib/nprogress/nprogress.min.js"></script>
+  <script type="text/javascript" src="/js/src/even.js?v=2.11.0"></script>
 </body>
 </html>
