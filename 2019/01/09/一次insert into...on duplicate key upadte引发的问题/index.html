@@ -17,7 +17,7 @@
 
 <link rel="stylesheet" href="/css/main.css?v=7.3.0">
 
-
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Monda:300,300italic,400,400italic,700,700italic|Roboto Slab:300,300italic,400,400italic,700,700italic|PT Mono:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
 <link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.7.0">
 
 
@@ -29,7 +29,7 @@
     version: '7.3.0',
     exturl: false,
     sidebar: {"position":"left","display":"post","offset":12,"onmobile":false},
-    copycode: {"enable":true,"show_result":false,"style":"mac"},
+    copycode: {"enable":true,"show_result":true,"style":"mac"},
     back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
     bookmark: {"enable":false,"color":"#222","save":"auto"},
     fancybox: false,
@@ -37,14 +37,14 @@
     lazyload: false,
     pangu: false,
     algolia: {
-      appID: '',
-      apiKey: '',
-      indexName: '',
+      appID: 'DA3PID79SP',
+      apiKey: '9708e54cffa2422172583ac9329b544e',
+      indexName: 'blog',
       hits: {"per_page":10},
       labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
     },
-    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
-    path: '',
+    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
     motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
     translation: {
       copy_button: '复制',
@@ -308,6 +308,14 @@
           
 
           
+            <span class="post-meta-item" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
 
         </div>
       </header>
@@ -321,9 +329,17 @@
         <h2 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h2><p>  最近有业务场景使用insert into … on duplicate key update进行插入更新操作，然后通过返回的affected rows来确定是进行了插入操作还是更新操作。印象中当不出现键冲突的时候affected rows应该为1（作用等同于insert into）, 而当键冲突的时候affected rows应该为2。但是实际情况是有键位冲突更新的时候affected rows返回的是1。  </p>
 <a id="more"></a>
 <h2 id="解决思路"><a href="#解决思路" class="headerlink" title="解决思路"></a>解决思路</h2><p>  首先我们梳理下表结构以及执行语句，业务表的设计大致如下：</p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">create</span> <span class="keyword">table</span> <span class="built_in">Record</span>(</span><br><span class="line">    <span class="keyword">id</span> <span class="built_in">int</span> auto_increment primary <span class="keyword">key</span>,</span><br><span class="line">    user_id <span class="built_in">int</span> <span class="keyword">not</span> <span class="literal">null</span> <span class="keyword">comment</span> <span class="string">'用户id'</span>,</span><br><span class="line">    object_id <span class="built_in">int</span> <span class="keyword">not</span> <span class="literal">null</span> <span class="keyword">comment</span> <span class="string">'对方id'</span>,</span><br><span class="line">    create_time datetime <span class="keyword">not</span> <span class="literal">null</span> <span class="keyword">default</span> <span class="keyword">now</span>() <span class="keyword">comment</span> <span class="string">'记录创建时间'</span>,</span><br><span class="line">    <span class="keyword">unique</span> <span class="keyword">key</span> idx_user_object(<span class="string">`user_id`</span>,<span class="string">`object_id`</span>)</span><br><span class="line">)<span class="keyword">engine</span> = <span class="keyword">innodb</span> <span class="keyword">comment</span> <span class="string">'记录表'</span></span><br></pre></td></tr></table></figure>
+<pre><code class="sql">create table Record(
+    id int auto_increment primary key,
+    user_id int not null comment &#39;用户id&#39;,
+    object_id int not null comment &#39;对方id&#39;,
+    create_time datetime not null default now() comment &#39;记录创建时间&#39;,
+    unique key idx_user_object(`user_id`,`object_id`)
+)engine = innodb comment &#39;记录表&#39;
+</code></pre>
 <p>实际执行的业务操作语句如下:</p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> <span class="built_in">Record</span>(user_id,object_id,create_time) <span class="keyword">values</span>(<span class="number">1</span>,<span class="number">1</span>,<span class="keyword">now</span>()) <span class="keyword">on</span> <span class="keyword">duplicate</span> <span class="keyword">key</span> <span class="keyword">update</span> <span class="keyword">set</span> create_time = <span class="keyword">now</span>()</span><br></pre></td></tr></table></figure>
+<pre><code class="sql">insert into Record(user_id,object_id,create_time) values(1,1,now()) on duplicate key update set create_time = now()
+</code></pre>
 <p>查了<a href="https://dev.mysql.com/doc/refman/5.7/en/insert-on-duplicate.html" target="_blank" rel="noopener">MySQL Reference</a>可以发现是有对affected rows 进行说明的，内容如下:</p>
 <blockquote>
 <p>With ON DUPLICATE KEY UPDATE, the affected-rows value per row is 1 if the row is inserted as a new row, 2 if an existing row is updated, and 0 if an existing row is set to its current values. If you specify the CLIENT_FOUND_ROWS flag to the mysql_real_connect() C API function when connecting to mysqld, the affected-rows value is 1 (not 0) if an existing row is set to its current values.  </p>
@@ -335,7 +351,8 @@
 </blockquote>
 <p>而默认jdbc是会默认传递CLIENT_FOUND_ROWS的，也就是返回的是寻找到的行，当然可以在连接参数上加上userAffectedRows=true来让其返回收影响的行</p>
 <h2 id="问题验证"><a href="#问题验证" class="headerlink" title="问题验证"></a>问题验证</h2><p>直接在库中执行</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">insert into `Record`(`user_id`,`object_id`,`create_time`) values(1,1,&apos;2019-1-9 19:03:33&apos;) on duplicate key update create_time = &apos;2019-1-9 19:03:33&apos;</span><br></pre></td></tr></table></figure>
+<pre><code class="mysql">insert into `Record`(`user_id`,`object_id`,`create_time`) values(1,1,&#39;2019-1-9 19:03:33&#39;) on duplicate key update create_time = &#39;2019-1-9 19:03:33&#39;
+</code></pre>
 <p>返回<code>Query OK, 1 row affected</code>，接下来继续执行相同的语句，返回<code>Query OK, 0 rows affected</code>，意味着情况和文档描述的一样。我们通过jdbc直接操作会发现第二次执行语句时是会返回affected rows = 1的，在连接字符串上加上useAffectedRows是会发现返回的是affected rows = 0 </p>
 <blockquote>
 <p>注意<br>如果使用了mycat中间件的话，在连接字符串加useAffectedRow也没设么用，因为mycat默认配置的就是CLIENT_FOUND_ROWS<br><img src="/assets/blogImg/mycat-img01.jpg" alt="代码结构"><br></p>
@@ -561,6 +578,25 @@
   <div class="theme-info">主题 – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> v7.3.0</div>
 
         
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-user"></i>
+    </span>
+    <span class="site-uv" title="总访客量">
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+    <span class="post-meta-divider">|</span>
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-eye"></i>
+    </span>
+    <span class="site-pv" title="总访问量">
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
 
 
 

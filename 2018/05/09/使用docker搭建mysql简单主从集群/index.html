@@ -17,7 +17,7 @@
 
 <link rel="stylesheet" href="/css/main.css?v=7.3.0">
 
-
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Monda:300,300italic,400,400italic,700,700italic|Roboto Slab:300,300italic,400,400italic,700,700italic|PT Mono:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
 <link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.7.0">
 
 
@@ -29,7 +29,7 @@
     version: '7.3.0',
     exturl: false,
     sidebar: {"position":"left","display":"post","offset":12,"onmobile":false},
-    copycode: {"enable":true,"show_result":false,"style":"mac"},
+    copycode: {"enable":true,"show_result":true,"style":"mac"},
     back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
     bookmark: {"enable":false,"color":"#222","save":"auto"},
     fancybox: false,
@@ -37,14 +37,14 @@
     lazyload: false,
     pangu: false,
     algolia: {
-      appID: '',
-      apiKey: '',
-      indexName: '',
+      appID: 'DA3PID79SP',
+      apiKey: '9708e54cffa2422172583ac9329b544e',
+      indexName: 'blog',
       hits: {"per_page":10},
       labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
     },
-    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
-    path: '',
+    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
     motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
     translation: {
       copy_button: '复制',
@@ -306,6 +306,14 @@
           
 
           
+            <span class="post-meta-item" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
 
         </div>
       </header>
@@ -321,40 +329,66 @@
 <h2 id="开发环境"><a href="#开发环境" class="headerlink" title="开发环境"></a>开发环境</h2><p>OS X EI Capitan 10.11.6<br>docker版本17.09.0-ce-mac35 (19611)<br>mysql镜像版本5.7(这里我直接下载的标签为latest的最新版本)</p>
 <h2 id="具体实现步骤"><a href="#具体实现步骤" class="headerlink" title="具体实现步骤"></a>具体实现步骤</h2><h3 id="建立主库容器"><a href="#建立主库容器" class="headerlink" title="建立主库容器"></a>建立主库容器</h3><ol>
 <li><p>建立主数据库</p>
- <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -d -p 3307:3306 -v /data/mysqlcnf/master:/etc/mysql/conf.d -e MYSQL_ROOT_PASSWORD=123456 --name master mysql</span><br></pre></td></tr></table></figure>
+<pre><code class="shell">     docker run -d -p 3307:3306 -v /data/mysqlcnf/master:/etc/mysql/conf.d -e MYSQL_ROOT_PASSWORD=123456 --name master mysql
+</code></pre>
 </li>
 <li><p>在本机目录/data/mysqlcnf/master中新建mysql数据库配置文件my.cnf，内容如下:</p>
- <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[mysqld]</span><br><span class="line">server-id                = 1</span><br><span class="line">log_bin                  = mysql-bin</span><br><span class="line">binlog-format            = ROW</span><br><span class="line">lower_case_table_names   = 1</span><br></pre></td></tr></table></figure>
+<pre><code class="shell">     [mysqld]
+     server-id                = 1
+     log_bin                  = mysql-bin
+     binlog-format            = ROW
+     lower_case_table_names   = 1
+</code></pre>
 <p> 需要注意下mysql镜像自带是有配置文件的，我们映射过来的文件夹并不能完全覆盖，所以不要让配置文件冲突</p>
 </li>
 <li><p>重启容器</p>
- <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker restart master</span><br></pre></td></tr></table></figure>
+<pre><code class="shell">     docker restart master
+</code></pre>
 </li>
 <li><p>建立授权帐号</p>
- <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">grant</span> <span class="keyword">replication</span> <span class="keyword">slave</span> <span class="keyword">on</span> *.* <span class="keyword">to</span> <span class="string">'sync'</span>@<span class="string">'%'</span> <span class="keyword">identified</span> <span class="keyword">by</span> <span class="string">'sync'</span></span><br><span class="line"><span class="keyword">flush</span> <span class="keyword">privileges</span></span><br></pre></td></tr></table></figure>
+<pre><code class="sql">     grant replication slave on *.* to &#39;sync&#39;@&#39;%&#39; identified by &#39;sync&#39;
+     flush privileges
+</code></pre>
 </li>
 <li><p>查询下主库当前binlog情况</p>
- <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">show</span> <span class="keyword">master</span> <span class="keyword">status</span></span><br></pre></td></tr></table></figure>
+<pre><code class="sql">     show master status
+</code></pre>
 <p> 记录下file和position，等到设置从库时需要</p>
 </li>
 </ol>
 <h3 id="建立从库容器"><a href="#建立从库容器" class="headerlink" title="建立从库容器"></a>建立从库容器</h3><ol>
 <li><p>建立从数据库(使用link实现从库连接主库)</p>
- <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -d -p 3307:3306 -v /data/mysqlcnf/slave:/etc/mysql/conf.d -e MYSQL_ROOT_PASSWORD=123456 --name slave --link master:master mysql</span><br></pre></td></tr></table></figure>
+<pre><code class="shell">     docker run -d -p 3307:3306 -v /data/mysqlcnf/slave:/etc/mysql/conf.d -e MYSQL_ROOT_PASSWORD=123456 --name slave --link master:master mysql
+</code></pre>
 </li>
 <li><p>从库配置文件</p>
- <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">[mysqld]</span><br><span class="line">server-id              = 2</span><br><span class="line"></span><br><span class="line">log-bin                = mysql-bin</span><br><span class="line">binlog-format          = ROW</span><br><span class="line">lower_case_table_names = 1</span><br><span class="line">log-slave-updates      = 1</span><br><span class="line">relay-log              = slave-relay-bin</span><br><span class="line">relay-log-index        = slave-relay-bin.index</span><br><span class="line">read-only              = 1</span><br></pre></td></tr></table></figure>
+<pre><code class="shell">     [mysqld]
+     server-id              = 2
+
+     log-bin                = mysql-bin
+     binlog-format          = ROW
+     lower_case_table_names = 1
+     log-slave-updates      = 1
+     relay-log              = slave-relay-bin
+     relay-log-index        = slave-relay-bin.index
+     read-only              = 1
+</code></pre>
 <p> log-slave-updates参数的意义在于，如果该库是从库，从主库binlog读取的更新是不会继续写入该库的binlog，设置该参数后则可以实现读取主库binlog之后写入自己库的binlog，用来做其他从库的主库</p>
 </li>
 <li><p>重启容器</p>
- <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker restart slave</span><br></pre></td></tr></table></figure>
+<pre><code class="shell">     docker restart slave
+</code></pre>
 </li>
 <li><p>登录从库服务器设置主库</p>
- <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CHANGE</span> <span class="keyword">MASTER</span> <span class="keyword">TO</span> MASTER_HOST=<span class="string">'master'</span>,MASTER_USER=<span class="string">'sync'</span>, MASTER_PASSWORD=<span class="string">'sync'</span>,MASTER_LOG_FILE=<span class="string">'mysql-bin.000005'</span>, MASTER_LOG_POS=<span class="number">154</span>;</span><br><span class="line"><span class="keyword">flush</span> <span class="keyword">privileges</span></span><br><span class="line"><span class="keyword">start</span> <span class="keyword">slave</span></span><br></pre></td></tr></table></figure>
+<pre><code class="sql">     CHANGE MASTER TO MASTER_HOST=&#39;master&#39;,MASTER_USER=&#39;sync&#39;, MASTER_PASSWORD=&#39;sync&#39;,MASTER_LOG_FILE=&#39;mysql-bin.000005&#39;, MASTER_LOG_POS=154;
+     flush privileges
+     start slave
+</code></pre>
 <p> 这里设置的值master_log_file以及master_log_pos根据当初查询主库得来</p>
 </li>
 <li><p>查看从库状态</p>
- <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">show</span> <span class="keyword">slave</span> <span class="keyword">status</span>\G</span><br></pre></td></tr></table></figure>
+<pre><code class="sql">     show slave status\G
+</code></pre>
 </li>
 </ol>
 <p>至此简单的mysql的主从集群搭建完成</p>
@@ -585,6 +619,25 @@
   <div class="theme-info">主题 – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> v7.3.0</div>
 
         
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-user"></i>
+    </span>
+    <span class="site-uv" title="总访客量">
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+    <span class="post-meta-divider">|</span>
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-eye"></i>
+    </span>
+    <span class="site-pv" title="总访问量">
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
 
 
 

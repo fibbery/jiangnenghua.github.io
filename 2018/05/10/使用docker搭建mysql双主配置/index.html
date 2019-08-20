@@ -17,7 +17,7 @@
 
 <link rel="stylesheet" href="/css/main.css?v=7.3.0">
 
-
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Monda:300,300italic,400,400italic,700,700italic|Roboto Slab:300,300italic,400,400italic,700,700italic|PT Mono:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
 <link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.7.0">
 
 
@@ -29,7 +29,7 @@
     version: '7.3.0',
     exturl: false,
     sidebar: {"position":"left","display":"post","offset":12,"onmobile":false},
-    copycode: {"enable":true,"show_result":false,"style":"mac"},
+    copycode: {"enable":true,"show_result":true,"style":"mac"},
     back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
     bookmark: {"enable":false,"color":"#222","save":"auto"},
     fancybox: false,
@@ -37,14 +37,14 @@
     lazyload: false,
     pangu: false,
     algolia: {
-      appID: '',
-      apiKey: '',
-      indexName: '',
+      appID: 'DA3PID79SP',
+      apiKey: '9708e54cffa2422172583ac9329b544e',
+      indexName: 'blog',
       hits: {"per_page":10},
       labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
     },
-    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
-    path: '',
+    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
     motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
     translation: {
       copy_button: '复制',
@@ -306,6 +306,14 @@
           
 
           
+            <span class="post-meta-item" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
 
         </div>
       </header>
@@ -320,31 +328,61 @@
 <a id="more"></a>
 <h2 id="实践步骤"><a href="#实践步骤" class="headerlink" title="实践步骤"></a>实践步骤</h2><ol>
 <li><p>搭建好docker网络<br> 因为需要两个容器互联，所以需要使用docker连创建互联网络，参见<a href="http://www.up4dev.com/2016/10/09/docker-network-create/" target="_blank" rel="noopener">用network create解决Docker容器互相连接的问题</a><br> </p>
- <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker network create my-net  # 先创建一个网络</span><br><span class="line">docker network ls # 查看一下是否创建成功</span><br></pre></td></tr></table></figure>
+<pre><code class="shell">     docker network create my-net  # 先创建一个网络
+     docker network ls # 查看一下是否创建成功
+</code></pre>
 </li>
 <li><p>新建masterA库</p>
- <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -d -p 3306:3306 -v /data/mysqlcnf/masterA:/etc/mysql/conf.d -e MYSQL_ROOT_PASSWORD=123456 --name masterA --net=my-net --net-alias=masterA mysql   # 利用自建网络搭建主库A</span><br></pre></td></tr></table></figure>
+<pre><code class="shell">      docker run -d -p 3306:3306 -v /data/mysqlcnf/masterA:/etc/mysql/conf.d -e MYSQL_ROOT_PASSWORD=123456 --name masterA --net=my-net --net-alias=masterA mysql   # 利用自建网络搭建主库A
+</code></pre>
 <p> 数据库配置文件如下:</p>
- <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">server-id                = 1</span><br><span class="line">auto_increment_offset    = 1</span><br><span class="line">auto_increment_increment = 1</span><br><span class="line"></span><br><span class="line">log_bin                = mysql-bin</span><br><span class="line">binlog-format          = ROW</span><br><span class="line">log-slave-updates      = true</span><br><span class="line">relay-log              = slave-relay-bin</span><br><span class="line">relay-log-index        = slave-relay-bin.index</span><br><span class="line">lower_case_table_names = 1</span><br></pre></td></tr></table></figure>
+<pre><code class="shell">     server-id                = 1
+     auto_increment_offset    = 1
+     auto_increment_increment = 1
+
+     log_bin                = mysql-bin
+     binlog-format          = ROW
+     log-slave-updates      = true
+     relay-log              = slave-relay-bin
+     relay-log-index        = slave-relay-bin.index
+     lower_case_table_names = 1
+</code></pre>
 <p> 因为是互为主从，所以auto_increment_offset(起始位移点)和auto_increment_increment(步长)必须间隔设置，同时必须开启log-slave-updates设置，前文有提到过。</p>
 <p> 重启masterA库</p>
- <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker restart masterA</span><br></pre></td></tr></table></figure>
+<pre><code class="shell">     docker restart masterA
+</code></pre>
 </li>
 <li><p>新建masterB 主库</p>
- <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -d -p 3307:3306 -v /data/mysqlcnf/masterB:/etc/mysql/conf.d -e MYSQL_ROOT_PASSWORD=123456 --name masterB --net=my-net --net-alias=masterB mysql  # 利用自建网络搭建主库B</span><br></pre></td></tr></table></figure>
+<pre><code class="shell">     docker run -d -p 3307:3306 -v /data/mysqlcnf/masterB:/etc/mysql/conf.d -e MYSQL_ROOT_PASSWORD=123456 --name masterB --net=my-net --net-alias=masterB mysql  # 利用自建网络搭建主库B
+</code></pre>
 <p> 数据库配置文件如下:</p>
- <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[mysqld]</span><br><span class="line">server-id                = 2</span><br><span class="line">auto_increment_offset    = 2</span><br><span class="line">auto_increment_increment = 2</span><br><span class="line"></span><br><span class="line">log_bin                = mysql-bin</span><br><span class="line">binlog-format          = ROW</span><br><span class="line">log-slave-updates      = true</span><br><span class="line">relay-log              = slave-relay-bin</span><br><span class="line">relay-log-index        = slave-relay-bin.index</span><br><span class="line">lower_case_table_names = 1</span><br></pre></td></tr></table></figure>
+<pre><code class="shell">     [mysqld]
+     server-id                = 2
+     auto_increment_offset    = 2
+     auto_increment_increment = 2
+
+     log_bin                = mysql-bin
+     binlog-format          = ROW
+     log-slave-updates      = true
+     relay-log              = slave-relay-bin
+     relay-log-index        = slave-relay-bin.index
+     lower_case_table_names = 1
+</code></pre>
 <p> 重启B库</p>
- <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker restart masterB</span><br></pre></td></tr></table></figure>
+<pre><code class="shell">     docker restart masterB
+</code></pre>
 </li>
 <li><p>配置数据库帐号以及主从配置<br> 分别登录masterA和masterB添加从库同步帐号</p>
- <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">grant</span> <span class="keyword">replication</span> <span class="keyword">slave</span> <span class="keyword">on</span> *.* <span class="keyword">to</span> <span class="string">'sync'</span>@<span class="string">'%'</span> <span class="keyword">identified</span> <span class="keyword">by</span> <span class="string">'sync'</span>  # 新建同步帐号</span><br><span class="line"><span class="keyword">flush</span> <span class="keyword">privileges</span> # 刷新权限缓存</span><br></pre></td></tr></table></figure>
+<pre><code class="sql">     grant replication slave on *.* to &#39;sync&#39;@&#39;%&#39; identified by &#39;sync&#39;  # 新建同步帐号
+     flush privileges # 刷新权限缓存
+</code></pre>
 <p> 分别执行查看masterA和masterB的binlog情况</p>
- <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">show</span> <span class="keyword">master</span> <span class="keyword">status</span></span><br></pre></td></tr></table></figure>
+<pre><code class="sql">     show master status
+</code></pre>
 <p> 分别进行主从同步<br> ```sql</p>
-<pre><code>change master to master_host=&apos;${host}&apos;,master_port=&apos;${port}&apos;,master_user= &apos;${master_user}&apos; ,master_password=&apos;${master_password}&apos;,master_log_file=&apos;${master_log_file}&apos;,master_log_pos=&apos;${master_log_pos}&apos;
-start slave
-show slave status\G
+<pre><code> change master to master_host=&#39;${host}&#39;,master_port=&#39;${port}&#39;,master_user= &#39;${master_user}&#39; ,master_password=&#39;${master_password}&#39;,master_log_file=&#39;${master_log_file}&#39;,master_log_pos=&#39;${master_log_pos}&#39;
+ start slave
+ show slave status\G
 </code></pre><p> ```　<br> 以上sql都可以观看前文得知，不再赘述。到此，双主mysql集群搭建完成。</p>
 </li>
 </ol>
@@ -576,6 +614,25 @@ show slave status\G
   <div class="theme-info">主题 – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> v7.3.0</div>
 
         
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-user"></i>
+    </span>
+    <span class="site-uv" title="总访客量">
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+    <span class="post-meta-divider">|</span>
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-eye"></i>
+    </span>
+    <span class="site-pv" title="总访问量">
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
 
 
 

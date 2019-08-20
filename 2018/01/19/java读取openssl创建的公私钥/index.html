@@ -17,7 +17,7 @@
 
 <link rel="stylesheet" href="/css/main.css?v=7.3.0">
 
-
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Monda:300,300italic,400,400italic,700,700italic|Roboto Slab:300,300italic,400,400italic,700,700italic|PT Mono:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
 <link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.7.0">
 
 
@@ -29,7 +29,7 @@
     version: '7.3.0',
     exturl: false,
     sidebar: {"position":"left","display":"post","offset":12,"onmobile":false},
-    copycode: {"enable":true,"show_result":false,"style":"mac"},
+    copycode: {"enable":true,"show_result":true,"style":"mac"},
     back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
     bookmark: {"enable":false,"color":"#222","save":"auto"},
     fancybox: false,
@@ -37,14 +37,14 @@
     lazyload: false,
     pangu: false,
     algolia: {
-      appID: '',
-      apiKey: '',
-      indexName: '',
+      appID: 'DA3PID79SP',
+      apiKey: '9708e54cffa2422172583ac9329b544e',
+      indexName: 'blog',
       hits: {"per_page":10},
       labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
     },
-    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
-    path: '',
+    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
     motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
     translation: {
       copy_button: '复制',
@@ -306,6 +306,14 @@
           
 
           
+            <span class="post-meta-item" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
 
         </div>
       </header>
@@ -318,20 +326,50 @@
       
         <p>最近在考虑使用Netty搭建HTTP/HTTPS代理服务器，遇到了openssl密钥读取问题，下面概述步骤。<br>选用openssl生成密钥的初衷是netty的SslContextBuilder对其支持比较直接，相较于使用keytool更为容易读取。</p>
 <a id="more"></a>
-<h2 id="公私钥以及证书的生成"><a href="#公私钥以及证书的生成" class="headerlink" title="公私钥以及证书的生成"></a>公私钥以及证书的生成</h2><p>openssl工具生成十分简单，只概叙其命令步骤<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span> 生成私钥</span><br><span class="line">1. openssl genrsa -out rsa_private_key.pem 1024</span><br><span class="line"><span class="meta">#</span> 根据私钥生成公钥</span><br><span class="line">2. openssl rsa -in rsa_private_key.pem -out rsa_public_key.pem -outform PEM -pubout  </span><br><span class="line"><span class="meta">#</span> java不能直接读取该私钥，需要转换成pkcs8格式</span><br><span class="line">3. openssl pkcs8 -topk8 -inform PEM -in rsa_private_key.pem -outform PEM -nocrypt -out rsa_private_key_pkcs8.pem</span><br><span class="line"><span class="meta">#</span> 根据私钥创建证书请求</span><br><span class="line">4. openssl req -new -key rsa_private_key.pem -out rsa_public_key.csr</span><br><span class="line"><span class="meta">#</span> 生成证书并且签名</span><br><span class="line">5. openssl x509 -req -days 3650 -in rsa_public_key.csr -signkey rsa_private_key.pem -out rsa_public_key.crt</span><br></pre></td></tr></table></figure></p>
-<h3 id="java读取私钥以及公钥"><a href="#java读取私钥以及公钥" class="headerlink" title="java读取私钥以及公钥"></a>java读取私钥以及公钥</h3><p>文本打开公私钥，可以发现格式都是如下类似格式：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">-----BEGIN PUBLIC KEY-----</span><br><span class="line">MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC5M2njgC84dLEvMHNHEmZMhtYx</span><br><span class="line">w7ncLjZQIyAHyGfruJqTksdJ16V1eRNN3pEn17QAOk6Y3pPjyH/+Meir2iK9GGyB</span><br><span class="line">L9Yvli0eo5xMcLv1XmLeLgQ1EFetRj6i4jTtvaIAIb0uAG3XHHqmQRD6+nLnqV5E</span><br><span class="line">f3iHyXNfo12Y7bjbbwIDAQAB</span><br><span class="line">-----END PUBLIC KEY-----</span><br></pre></td></tr></table></figure></p>
-<p>可以看出导出的文本都是Base64编码的字符串，我们只需要读入有效字符串，然后实例化成具体实体即可。</p>
+<h2 id="公私钥以及证书的生成"><a href="#公私钥以及证书的生成" class="headerlink" title="公私钥以及证书的生成"></a>公私钥以及证书的生成</h2><p>openssl工具生成十分简单，只概叙其命令步骤</p>
+<pre><code class="shell"># 生成私钥
+1. openssl genrsa -out rsa_private_key.pem 1024
+# 根据私钥生成公钥
+2. openssl rsa -in rsa_private_key.pem -out rsa_public_key.pem -outform PEM -pubout  
+# java不能直接读取该私钥，需要转换成pkcs8格式
+3. openssl pkcs8 -topk8 -inform PEM -in rsa_private_key.pem -outform PEM -nocrypt -out rsa_private_key_pkcs8.pem
+# 根据私钥创建证书请求
+4. openssl req -new -key rsa_private_key.pem -out rsa_public_key.csr
+# 生成证书并且签名
+5. openssl x509 -req -days 3650 -in rsa_public_key.csr -signkey rsa_private_key.pem -out rsa_public_key.crt
+</code></pre>
+<h3 id="java读取私钥以及公钥"><a href="#java读取私钥以及公钥" class="headerlink" title="java读取私钥以及公钥"></a>java读取私钥以及公钥</h3><p>文本打开公私钥，可以发现格式都是如下类似格式：</p>
+<pre><code>-----BEGIN PUBLIC KEY-----
+MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC5M2njgC84dLEvMHNHEmZMhtYx
+w7ncLjZQIyAHyGfruJqTksdJ16V1eRNN3pEn17QAOk6Y3pPjyH/+Meir2iK9GGyB
+L9Yvli0eo5xMcLv1XmLeLgQ1EFetRj6i4jTtvaIAIb0uAG3XHHqmQRD6+nLnqV5E
+f3iHyXNfo12Y7bjbbwIDAQAB
+-----END PUBLIC KEY-----
+</code></pre><p>可以看出导出的文本都是Base64编码的字符串，我们只需要读入有效字符串，然后实例化成具体实体即可。</p>
 <ol>
-<li><p>读取文本字符串</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">static</span> String <span class="title">readKeyStr</span><span class="params">(InputStream in)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        BufferedReader br = <span class="keyword">new</span> BufferedReader(<span class="keyword">new</span> InputStreamReader(in));</span><br><span class="line">        StringBuilder buffer = <span class="keyword">new</span> StringBuilder();</span><br><span class="line">        String line = <span class="keyword">null</span>;</span><br><span class="line">        <span class="keyword">while</span> ((line = br.readLine()) != <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">if</span> (line.charAt(<span class="number">0</span>) != <span class="string">'-'</span>) &#123;</span><br><span class="line">                buffer.append(line);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> buffer.toString();</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<li>读取文本字符串<pre><code class="java">private static String readKeyStr(InputStream in) throws Exception {
+     BufferedReader br = new BufferedReader(new InputStreamReader(in));
+     StringBuilder buffer = new StringBuilder();
+     String line = null;
+     while ((line = br.readLine()) != null) {
+         if (line.charAt(0) != &#39;-&#39;) {
+             buffer.append(line);
+         }
+     }
+     return buffer.toString();
+ }
+</code></pre>
 </li>
-<li><p>base64解码成真正的密钥字符</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">byte</span>[] bytes = Base64.getDecoder().decode(readKeyStr(in));</span><br></pre></td></tr></table></figure>
+<li>base64解码成真正的密钥字符<pre><code class="java">byte[] bytes = Base64.getDecoder().decode(readKeyStr(in));
+</code></pre>
 </li>
-<li><p>实例化成具体密钥实体</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"> <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> RSAPublicKey <span class="title">loadPublicKey</span><span class="params">(InputStream in)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="keyword">byte</span>[] bytes = Base64.getDecoder().decode(readKeyStr(in));</span><br><span class="line">        KeyFactory factory = KeyFactory.getInstance(<span class="string">"rsa"</span>);</span><br><span class="line">        X509EncodedKeySpec spec = <span class="keyword">new</span> X509EncodedKeySpec(bytes);</span><br><span class="line">        <span class="keyword">return</span> (RSAPublicKey) factory.generatePublic(spec);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> RSAPrivateKey <span class="title">loadPrivateKey</span><span class="params">(InputStream in)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="keyword">byte</span>[] bytes = Base64.getDecoder().decode(readKeyStr(in));</span><br><span class="line">        KeyFactory factory = KeyFactory.getInstance(<span class="string">"rsa"</span>);</span><br><span class="line">        PKCS8EncodedKeySpec spec = <span class="keyword">new</span> PKCS8EncodedKeySpec(bytes);</span><br><span class="line">        <span class="keyword">return</span> (RSAPrivateKey) factory.generatePrivate(spec);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
-</li>
+<li>实例化成具体密钥实体<br>```java<br>public static RSAPublicKey loadPublicKey(InputStream in) throws Exception {<pre><code> byte[] bytes = Base64.getDecoder().decode(readKeyStr(in));
+ KeyFactory factory = KeyFactory.getInstance(&quot;rsa&quot;);
+ X509EncodedKeySpec spec = new X509EncodedKeySpec(bytes);
+ return (RSAPublicKey) factory.generatePublic(spec);
+</code></pre> }</li>
 </ol>
+<p>public static RSAPrivateKey loadPrivateKey(InputStream in) throws Exception {<br>        byte[] bytes = Base64.getDecoder().decode(readKeyStr(in));<br>        KeyFactory factory = KeyFactory.getInstance(“rsa”);<br>        PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(bytes);<br>        return (RSAPrivateKey) factory.generatePrivate(spec);<br>    }<br>```</p>
 
     </div>
 
@@ -559,6 +597,25 @@
   <div class="theme-info">主题 – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> v7.3.0</div>
 
         
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-user"></i>
+    </span>
+    <span class="site-uv" title="总访客量">
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+    <span class="post-meta-divider">|</span>
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-eye"></i>
+    </span>
+    <span class="site-pv" title="总访问量">
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
 
 
 

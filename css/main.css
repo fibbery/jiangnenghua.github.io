@@ -153,7 +153,7 @@ template {
 body {
   background: #eee;
   color: #555;
-  font-family: 'Lato', "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-family: 'Monda', "PingFang SC", "Microsoft YaHei", sans-serif;
   font-size: 1em;
   line-height: 2;
   position: relative;
@@ -169,7 +169,7 @@ h3,
 h4,
 h5,
 h6 {
-  font-family: 'Lato', "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-family: 'Monda', "PingFang SC", "Microsoft YaHei", sans-serif;
   font-weight: bold;
   line-height: 1.5;
   margin: 20px 0 15px;
@@ -236,7 +236,6 @@ blockquote {
   color: #666;
   margin: 0;
   padding: 0 15px;
-  word-break: break-all;
 }
 blockquote cite::before {
   content: '-';
@@ -473,7 +472,7 @@ pre,
 }
 pre,
 code {
-  font-family: consolas, Menlo, "PingFang SC", "Microsoft YaHei", monospace;
+  font-family: 'PT Mono', consolas, Menlo, "PingFang SC", "Microsoft YaHei", monospace;
 }
 code {
   overflow-wrap: break-word;
@@ -1121,7 +1120,7 @@ pre .javascript .function {
 }
 .site-title {
   display: inline-block;
-  font-family: 'Lato', "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-family: 'Roboto Slab', 'Monda', "PingFang SC", "Microsoft YaHei", sans-serif;
   font-size: 1.375em;
   font-weight: normal;
   line-height: 1.5;
@@ -1217,7 +1216,7 @@ pre .javascript .function {
 .post-body {
   overflow-wrap: break-word;
   word-wrap: break-word;
-  font-family: 'Lato', "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-family: 'Monda', "PingFang SC", "Microsoft YaHei", sans-serif;
 }
 @media (min-width: 1200px) {
   .post-body {
@@ -1465,7 +1464,7 @@ pre .javascript .function {
 }
 .posts-expand .post-meta {
   color: #999;
-  font-family: 'Lato', "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-family: 'Monda', "PingFang SC", "Microsoft YaHei", sans-serif;
   margin: 3px 0 60px 0;
   text-align: center;
 }
@@ -1725,7 +1724,7 @@ pre .javascript .function {
 }
 .links-of-author a::before,
 .links-of-author span.exturl::before {
-  background: #24ffbd;
+  background: #37bad2;
   border-radius: 50%;
   content: ' ';
   display: inline-block;
@@ -2167,53 +2166,6 @@ pre .javascript .function {
 }
 .algolia-pagination .disabled-item {
   visibility: hidden;
-}
-.search-popup ul.search-result-list {
-  margin: 0 5px;
-  padding: 0;
-}
-.search-popup p.search-result {
-  border-bottom: 1px dashed #ccc;
-  padding: 5px 0;
-}
-.search-popup a.search-result-title {
-  font-weight: bold;
-}
-.search-popup .search-keyword {
-  border-bottom: 1px dashed #f00;
-  color: #f00;
-  font-weight: bold;
-}
-.search-popup #search-result {
-  height: calc(100% - 55px);
-  overflow: auto;
-  padding: 5px 25px;
-  position: relative;
-}
-.search-popup .search-input-wrapper {
-  display: inline-block;
-  height: 36px;
-  line-height: 36px;
-  padding: 0 5px;
-  position: absolute;
-  width: calc(100% - 90px);
-}
-.search-popup .search-input-wrapper input {
-  background: transparent;
-  border: none;
-  display: block;
-  height: 20px;
-  outline: none;
-  padding: 8px 0;
-  vertical-align: middle;
-  width: 100%;
-}
-.search-popup #no-result {
-  color: #ccc;
-  left: 50%;
-  position: absolute;
-  top: 50%;
-  transform: translate(-50%, -50%);
 }
 .page-archive .posts-collapse .archive-move-on {
   background: #999;

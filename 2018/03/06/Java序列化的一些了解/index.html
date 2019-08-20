@@ -17,7 +17,7 @@
 
 <link rel="stylesheet" href="/css/main.css?v=7.3.0">
 
-
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Monda:300,300italic,400,400italic,700,700italic|Roboto Slab:300,300italic,400,400italic,700,700italic|PT Mono:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
 <link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.7.0">
 
 
@@ -29,7 +29,7 @@
     version: '7.3.0',
     exturl: false,
     sidebar: {"position":"left","display":"post","offset":12,"onmobile":false},
-    copycode: {"enable":true,"show_result":false,"style":"mac"},
+    copycode: {"enable":true,"show_result":true,"style":"mac"},
     back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
     bookmark: {"enable":false,"color":"#222","save":"auto"},
     fancybox: false,
@@ -37,14 +37,14 @@
     lazyload: false,
     pangu: false,
     algolia: {
-      appID: '',
-      apiKey: '',
-      indexName: '',
+      appID: 'DA3PID79SP',
+      apiKey: '9708e54cffa2422172583ac9329b544e',
+      indexName: 'blog',
       hits: {"per_page":10},
       labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
     },
-    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
-    path: '',
+    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
     motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
     translation: {
       copy_button: '复制',
@@ -306,6 +306,14 @@
           
 
           
+            <span class="post-meta-item" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
 
         </div>
       </header>
@@ -317,14 +325,65 @@
 
       
         <h2 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h2><p>通常来说序列化和反序列化通常是一起的。我们常见的就是你只要将类实现Serializable接口，就能将该类的对象序列化二进制文件，同时能通过反序列化将二进制文件还原成对象。<br><a id="more"></a></p>
-<h2 id="具体实现"><a href="#具体实现" class="headerlink" title="具体实现"></a>具体实现</h2><p>我们通过Demo来了解Java序列化和反序列化的具体情况，代码如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Test</span> <span class="keyword">implements</span> <span class="title">Serializable</span></span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">long</span> serialVersionUID = -<span class="number">7303637756547202487L</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> staticVar = <span class="number">5</span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException, ClassNotFoundException </span>&#123;</span><br><span class="line">        <span class="comment">//进行序列化到二进制文件中</span></span><br><span class="line">        File file = <span class="keyword">new</span> File(<span class="string">"out"</span>);</span><br><span class="line">        ObjectOutputStream out = <span class="keyword">new</span> ObjectOutputStream(<span class="keyword">new</span> FileOutputStream(file));</span><br><span class="line">        out.writeObject(<span class="keyword">new</span> Test());</span><br><span class="line">        out.close();</span><br><span class="line">        <span class="comment">//从二进制文件中反序列化成对象</span></span><br><span class="line">        ObjectInputStream ins = <span class="keyword">new</span> ObjectInputStream(<span class="keyword">new</span> FileInputStream(file));</span><br><span class="line">        Test o = (Test) ins.readObject();</span><br><span class="line">        ins.close();</span><br><span class="line">        System.out.println(o.staticVar);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h2 id="具体实现"><a href="#具体实现" class="headerlink" title="具体实现"></a>具体实现</h2><p>我们通过Demo来了解Java序列化和反序列化的具体情况，代码如下：</p>
+<pre><code class="java">public class Test implements Serializable{
+
+    private static final long serialVersionUID = -7303637756547202487L;
+
+    public static int staticVar = 5;
+
+    public static void main(String[] args) throws IOException, ClassNotFoundException {
+        //进行序列化到二进制文件中
+        File file = new File(&quot;out&quot;);
+        ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(file));
+        out.writeObject(new Test());
+        out.close();
+        //从二进制文件中反序列化成对象
+        ObjectInputStream ins = new ObjectInputStream(new FileInputStream(file));
+        Test o = (Test) ins.readObject();
+        ins.close();
+        System.out.println(o.staticVar);
+    }
+}
+</code></pre>
 <p>针对以上Demo可以知道Java的序列化和反序列化其实就是使用ObjectInputStream和ObjectInputStream对实现了Serializable类的读写。深入代码可以发现，在序列化过程中，虚拟机会试图调用对象类里的 writeObject 和 readObject 方法，进行用户自定义的序列化和反序列化，如果没有这样的方法，则默认调用是 ObjectOutputStream 的 defaultWriteObject 方法以及 ObjectInputStream 的 defaultReadObject 方法。</p>
 <h2 id="序列化的特点"><a href="#序列化的特点" class="headerlink" title="序列化的特点"></a>序列化的特点</h2><ol>
 <li>如果某个类可以被序列化，其子类也可以被序列化。但是如果子类实现序列化，父类没有，那么子类反序列化会将父类那部分属性丢失。</li>
 <li>声明为static和transient类型的成员数据不能被序列化，因为static代表类的状态，而transient代表对象的临时数据。</li>
 <li>Java 序列化机制为了节省磁盘空间，具有特定的存储规则，当写入文件的为同一对象时，并不会再将对象的内容进行存储，而只是再次存储一份引用。</li>
 </ol>
-<p>根据第三点使用Demo详细说明下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Reference</span> <span class="keyword">implements</span> <span class="title">Serializable</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">long</span> serialVersionUID = -<span class="number">8386243968193725155L</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">getName</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> name;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setName</span><span class="params">(String name)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.name = name;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException, ClassNotFoundException </span>&#123;</span><br><span class="line">        Reference reference = <span class="keyword">new</span> Reference();</span><br><span class="line">        reference.setName(<span class="string">"java"</span>);</span><br><span class="line"></span><br><span class="line">        File file = <span class="keyword">new</span> File(<span class="string">"reference"</span>);</span><br><span class="line">        ObjectOutputStream os = <span class="keyword">new</span> ObjectOutputStream(<span class="keyword">new</span> FileOutputStream(file));</span><br><span class="line">        os.writeObject(reference);</span><br><span class="line">        <span class="comment">//reference.setName("python")   ---- 展现特性的情况</span></span><br><span class="line">        os.writeObject(reference); <span class="comment">//再次写入</span></span><br><span class="line"></span><br><span class="line">        ObjectInputStream is = <span class="keyword">new</span> ObjectInputStream(<span class="keyword">new</span> FileInputStream(file));</span><br><span class="line">        Reference reference1 = (Reference) is.readObject();</span><br><span class="line">        Reference reference2 = (Reference) is.readObject();</span><br><span class="line">        System.out.println(reference1 == reference2);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>根据第三点使用Demo详细说明下：</p>
+<pre><code class="java">public class Reference implements Serializable {
+
+    private static final long serialVersionUID = -8386243968193725155L;
+
+    private String name;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public static void main(String[] args) throws IOException, ClassNotFoundException {
+        Reference reference = new Reference();
+        reference.setName(&quot;java&quot;);
+
+        File file = new File(&quot;reference&quot;);
+        ObjectOutputStream os = new ObjectOutputStream(new FileOutputStream(file));
+        os.writeObject(reference);
+        //reference.setName(&quot;python&quot;)   ---- 展现特性的情况
+        os.writeObject(reference); //再次写入
+
+        ObjectInputStream is = new ObjectInputStream(new FileInputStream(file));
+        Reference reference1 = (Reference) is.readObject();
+        Reference reference2 = (Reference) is.readObject();
+        System.out.println(reference1 == reference2);
+    }
+}
+</code></pre>
 <p>输出结果是true，同时比较写入一个对象的文件大小和写入两次相同对象文件的大小，发现没有呈2倍关系，证明其实第二次写入的只是一个引用而已。同时我们释放Demo的特性情况注释，发现结果还是True，说明在写入第一个对象之后，虽然改变了对象的成员变量，但是成员地址没有发生改变，虚拟机在进行第二次写入的时候，发现了一个相同的对象(地址相同)已经写入文件，因此只保存了一个引用，所以读取时，返回的仍然是第一次的对象。</p>
 <blockquote>
 <p>使用一个文件多次writeObject的时候需要注意这个问题</p>
@@ -338,7 +397,60 @@
 <h3 id="敏感字段加密"><a href="#敏感字段加密" class="headerlink" title="敏感字段加密"></a>敏感字段加密</h3><h4 id="由来-2"><a href="#由来-2" class="headerlink" title="由来"></a>由来</h4><blockquote>
 <p>参见<a href="#具体实现">具体实现</a></p>
 </blockquote>
-<h4 id="应对场景-2"><a href="#应对场景-2" class="headerlink" title="应对场景"></a>应对场景</h4><p>一些敏感信息不便于传输，可以对敏感字段进行加密，只有正确的客户端和服务端能加密和解密，避免传输过程中泄漏。因此可以在对象里自定义writeObject 和 readObject 方法，这样就可以完全控制对象序列化的过程，从而可以在序列化的过程中对某些数据进行加解密操作。<br>Demo代码如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Account</span> <span class="keyword">implements</span> <span class="title">Serializable</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">long</span> serialVersionUID = -<span class="number">5790119844861945929L</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> String password = <span class="string">"pass"</span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">getPassword</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> password;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setPassword</span><span class="params">(String password)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.password = password;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">writeObject</span><span class="params">(ObjectOutputStream os)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            ObjectOutputStream.PutField field = os.putFields();</span><br><span class="line">            System.out.println(<span class="string">" 原始密码: "</span> + password);</span><br><span class="line">            String encryptedPass = encrypt(password);<span class="comment">//伪码模拟加密</span></span><br><span class="line">            field.put(<span class="string">"password"</span>, encryptedPass); </span><br><span class="line">            os.writeFields();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">readObject</span><span class="params">(ObjectInputStream is)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            ObjectInputStream.GetField field = is.readFields();</span><br><span class="line">            Object encryptPass = field.get(<span class="string">"password"</span>, <span class="string">""</span>);</span><br><span class="line">            System.out.println(<span class="string">"获取加密的字符串："</span> + encryptPass);</span><br><span class="line">            String decryptPass = decryptPass(encryptPass); <span class="comment">//伪码模拟解密</span></span><br><span class="line">            password = decryptPass; </span><br><span class="line">        &#125; <span class="keyword">catch</span> (ClassNotFoundException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException, ClassNotFoundException </span>&#123;</span><br><span class="line">        ObjectOutputStream os = <span class="keyword">new</span> ObjectOutputStream(<span class="keyword">new</span> FileOutputStream(<span class="keyword">new</span> File(<span class="string">"password"</span>)));</span><br><span class="line">        os.writeObject(<span class="keyword">new</span> Account());</span><br><span class="line">        os.close();</span><br><span class="line"></span><br><span class="line">        ObjectInputStream is = <span class="keyword">new</span> ObjectInputStream(<span class="keyword">new</span> FileInputStream(<span class="keyword">new</span> File(<span class="string">"password"</span>)));</span><br><span class="line">        Account o = (Account) is.readObject();</span><br><span class="line">        System.out.println(<span class="string">"解密后的密码是："</span> + o.password);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h4 id="应对场景-2"><a href="#应对场景-2" class="headerlink" title="应对场景"></a>应对场景</h4><p>一些敏感信息不便于传输，可以对敏感字段进行加密，只有正确的客户端和服务端能加密和解密，避免传输过程中泄漏。因此可以在对象里自定义writeObject 和 readObject 方法，这样就可以完全控制对象序列化的过程，从而可以在序列化的过程中对某些数据进行加解密操作。<br>Demo代码如下：</p>
+<pre><code class="java">public class Account implements Serializable {
+
+    private static final long serialVersionUID = -5790119844861945929L;
+
+    private String password = &quot;pass&quot;;
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    private void writeObject(ObjectOutputStream os) {
+        try {
+            ObjectOutputStream.PutField field = os.putFields();
+            System.out.println(&quot; 原始密码: &quot; + password);
+            String encryptedPass = encrypt(password);//伪码模拟加密
+            field.put(&quot;password&quot;, encryptedPass); 
+            os.writeFields();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void readObject(ObjectInputStream is) {
+        try {
+            ObjectInputStream.GetField field = is.readFields();
+            Object encryptPass = field.get(&quot;password&quot;, &quot;&quot;);
+            System.out.println(&quot;获取加密的字符串：&quot; + encryptPass);
+            String decryptPass = decryptPass(encryptPass); //伪码模拟解密
+            password = decryptPass; 
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    public static void main(String[] args) throws IOException, ClassNotFoundException {
+        ObjectOutputStream os = new ObjectOutputStream(new FileOutputStream(new File(&quot;password&quot;)));
+        os.writeObject(new Account());
+        os.close();
+
+        ObjectInputStream is = new ObjectInputStream(new FileInputStream(new File(&quot;password&quot;)));
+        Account o = (Account) is.readObject();
+        System.out.println(&quot;解密后的密码是：&quot; + o.password);
+    }
+
+}
+</code></pre>
 <h2 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h2><p>1.<a href="http://blog.csdn.net/jiangwei0910410003/article/details/18989711" target="_blank" rel="noopener">Java中的序列化Serialable高级详解</a><br>2.<a href="http://www.oschina.net/question/4873_23270" target="_blank" rel="noopener">Java序列化的作用</a></p>
 
     </div>
@@ -565,6 +677,25 @@
   <div class="theme-info">主题 – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> v7.3.0</div>
 
         
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-user"></i>
+    </span>
+    <span class="site-uv" title="总访客量">
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+    <span class="post-meta-divider">|</span>
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-eye"></i>
+    </span>
+    <span class="site-pv" title="总访问量">
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
 
 
 

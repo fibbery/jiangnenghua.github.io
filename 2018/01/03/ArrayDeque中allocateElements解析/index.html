@@ -17,7 +17,7 @@
 
 <link rel="stylesheet" href="/css/main.css?v=7.3.0">
 
-
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Monda:300,300italic,400,400italic,700,700italic|Roboto Slab:300,300italic,400,400italic,700,700italic|PT Mono:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
 <link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.7.0">
 
 
@@ -29,7 +29,7 @@
     version: '7.3.0',
     exturl: false,
     sidebar: {"position":"left","display":"post","offset":12,"onmobile":false},
-    copycode: {"enable":true,"show_result":false,"style":"mac"},
+    copycode: {"enable":true,"show_result":true,"style":"mac"},
     back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
     bookmark: {"enable":false,"color":"#222","save":"auto"},
     fancybox: false,
@@ -37,14 +37,14 @@
     lazyload: false,
     pangu: false,
     algolia: {
-      appID: '',
-      apiKey: '',
-      indexName: '',
+      appID: 'DA3PID79SP',
+      apiKey: '9708e54cffa2422172583ac9329b544e',
+      indexName: 'blog',
       hits: {"per_page":10},
       labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
     },
-    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
-    path: '',
+    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
     motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
     translation: {
       copy_button: '复制',
@@ -306,6 +306,14 @@
           
 
           
+            <span class="post-meta-item" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
 
         </div>
       </header>
@@ -318,7 +326,26 @@
       
         <p>jdk1.7源码如下</p>
 <a id="more"></a>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">allocateElements</span><span class="params">(<span class="keyword">int</span> numElements)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> initialCapacity = MIN_INITIAL_CAPACITY;</span><br><span class="line">        <span class="comment">// Find the best power of two to hold elements.</span></span><br><span class="line">        <span class="comment">// Tests "&lt;=" because arrays aren't kept full.</span></span><br><span class="line">        <span class="keyword">if</span> (numElements &gt;= initialCapacity) &#123;</span><br><span class="line">            initialCapacity = numElements;</span><br><span class="line">            initialCapacity |= (initialCapacity &gt;&gt;&gt;  <span class="number">1</span>);</span><br><span class="line">            initialCapacity |= (initialCapacity &gt;&gt;&gt;  <span class="number">2</span>);</span><br><span class="line">            initialCapacity |= (initialCapacity &gt;&gt;&gt;  <span class="number">4</span>);</span><br><span class="line">            initialCapacity |= (initialCapacity &gt;&gt;&gt;  <span class="number">8</span>);</span><br><span class="line">            initialCapacity |= (initialCapacity &gt;&gt;&gt; <span class="number">16</span>);</span><br><span class="line">            initialCapacity++;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (initialCapacity &lt; <span class="number">0</span>)   </span><br><span class="line">            <span class="comment">// Too many elements, must back off</span></span><br><span class="line">            initialCapacity &gt;&gt;&gt;= <span class="number">1</span>;<span class="comment">// Good luck allocating 2 ^ 30 elements</span></span><br><span class="line">        &#125;</span><br><span class="line">        elements = (E[]) <span class="keyword">new</span> Object[initialCapacity];</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<pre><code class="java">private void allocateElements(int numElements) {
+        int initialCapacity = MIN_INITIAL_CAPACITY;
+        // Find the best power of two to hold elements.
+        // Tests &quot;&lt;=&quot; because arrays aren&#39;t kept full.
+        if (numElements &gt;= initialCapacity) {
+            initialCapacity = numElements;
+            initialCapacity |= (initialCapacity &gt;&gt;&gt;  1);
+            initialCapacity |= (initialCapacity &gt;&gt;&gt;  2);
+            initialCapacity |= (initialCapacity &gt;&gt;&gt;  4);
+            initialCapacity |= (initialCapacity &gt;&gt;&gt;  8);
+            initialCapacity |= (initialCapacity &gt;&gt;&gt; 16);
+            initialCapacity++;
+
+            if (initialCapacity &lt; 0)   
+            // Too many elements, must back off
+            initialCapacity &gt;&gt;&gt;= 1;// Good luck allocating 2 ^ 30 elements
+        }
+        elements = (E[]) new Object[initialCapacity];
+    }
+</code></pre>
 <!-- more -->
 <p>方法目的在于，当numElements 小于 initialCapacity的时候，直接取默认值 initialCapacity，而大于默认值的时候取 n = 2^k (k 为 32 以内的整数) ，此时 n &gt; numElements。<br>下面简单分析代码：<br>假设 a = 1xxxxxxx xxxxxxxx  (2进制表示 1表示该数的最高位, x代表0或者1)<br>a | a &gt;&gt;&gt; 1    =  11xxxxxx xxxxxxxx  (最高两位为11)<br>a | a &gt;&gt;&gt; 2    =  1111xxxx xxxxxxxx<br>a | a &gt;&gt;&gt; 4    =  11111111 xxxxxxxx<br>a | a &gt;&gt;&gt; 8    =  11111111 11111111<br>……..<br>最终的目的是将表示该数的最高位的1复制到接下来的1位、2位、4位直到16位,保证接下来a的低位全部是1，在加1一位导致高位左移，其余位数变成0，并且是2^k。</p>
 
@@ -520,6 +547,25 @@
   <div class="theme-info">主题 – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> v7.3.0</div>
 
         
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-user"></i>
+    </span>
+    <span class="site-uv" title="总访客量">
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+    <span class="post-meta-divider">|</span>
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-eye"></i>
+    </span>
+    <span class="site-pv" title="总访问量">
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
 
 
 
