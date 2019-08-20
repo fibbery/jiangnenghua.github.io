@@ -62,7 +62,7 @@
 <meta property="og:site_name" content="小笔记本">
 <meta property="og:description" content="前言最近对mysql集群搭建以及后期如何在线上进行拆分和迁移产生了兴趣，所以初步想在自己本机通过docker搭建一个简单的主从集群来满足一下好奇心">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2019-05-14T03:25:41.011Z">
+<meta property="og:updated_time" content="2019-08-20T09:26:07.866Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="使用docker搭建mysql简单主从集群">
 <meta name="twitter:description" content="前言最近对mysql集群搭建以及后期如何在线上进行拆分和迁移产生了兴趣，所以初步想在自己本机通过docker搭建一个简单的主从集群来满足一下好奇心">
@@ -287,7 +287,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2019-05-14 11:25:41" itemprop="dateModified" datetime="2019-05-14T11:25:41+08:00">2019-05-14</time>
+                <time title="修改时间：2019-08-20 17:26:07" itemprop="dateModified" datetime="2019-08-20T17:26:07+08:00">2019-08-20</time>
               </span>
             
           
@@ -329,66 +329,40 @@
 <h2 id="开发环境"><a href="#开发环境" class="headerlink" title="开发环境"></a>开发环境</h2><p>OS X EI Capitan 10.11.6<br>docker版本17.09.0-ce-mac35 (19611)<br>mysql镜像版本5.7(这里我直接下载的标签为latest的最新版本)</p>
 <h2 id="具体实现步骤"><a href="#具体实现步骤" class="headerlink" title="具体实现步骤"></a>具体实现步骤</h2><h3 id="建立主库容器"><a href="#建立主库容器" class="headerlink" title="建立主库容器"></a>建立主库容器</h3><ol>
 <li><p>建立主数据库</p>
-<pre><code class="shell">     docker run -d -p 3307:3306 -v /data/mysqlcnf/master:/etc/mysql/conf.d -e MYSQL_ROOT_PASSWORD=123456 --name master mysql
-</code></pre>
+ <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -d -p 3307:3306 -v /data/mysqlcnf/master:/etc/mysql/conf.d -e MYSQL_ROOT_PASSWORD=123456 --name master mysql</span><br></pre></td></tr></table></figure>
 </li>
 <li><p>在本机目录/data/mysqlcnf/master中新建mysql数据库配置文件my.cnf，内容如下:</p>
-<pre><code class="shell">     [mysqld]
-     server-id                = 1
-     log_bin                  = mysql-bin
-     binlog-format            = ROW
-     lower_case_table_names   = 1
-</code></pre>
+ <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[mysqld]</span><br><span class="line">server-id                = 1</span><br><span class="line">log_bin                  = mysql-bin</span><br><span class="line">binlog-format            = ROW</span><br><span class="line">lower_case_table_names   = 1</span><br></pre></td></tr></table></figure>
 <p> 需要注意下mysql镜像自带是有配置文件的，我们映射过来的文件夹并不能完全覆盖，所以不要让配置文件冲突</p>
 </li>
 <li><p>重启容器</p>
-<pre><code class="shell">     docker restart master
-</code></pre>
+ <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker restart master</span><br></pre></td></tr></table></figure>
 </li>
 <li><p>建立授权帐号</p>
-<pre><code class="sql">     grant replication slave on *.* to &#39;sync&#39;@&#39;%&#39; identified by &#39;sync&#39;
-     flush privileges
-</code></pre>
+ <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">grant</span> <span class="keyword">replication</span> <span class="keyword">slave</span> <span class="keyword">on</span> *.* <span class="keyword">to</span> <span class="string">'sync'</span>@<span class="string">'%'</span> <span class="keyword">identified</span> <span class="keyword">by</span> <span class="string">'sync'</span></span><br><span class="line"><span class="keyword">flush</span> <span class="keyword">privileges</span></span><br></pre></td></tr></table></figure>
 </li>
 <li><p>查询下主库当前binlog情况</p>
-<pre><code class="sql">     show master status
-</code></pre>
+ <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">show</span> <span class="keyword">master</span> <span class="keyword">status</span></span><br></pre></td></tr></table></figure>
 <p> 记录下file和position，等到设置从库时需要</p>
 </li>
 </ol>
 <h3 id="建立从库容器"><a href="#建立从库容器" class="headerlink" title="建立从库容器"></a>建立从库容器</h3><ol>
 <li><p>建立从数据库(使用link实现从库连接主库)</p>
-<pre><code class="shell">     docker run -d -p 3307:3306 -v /data/mysqlcnf/slave:/etc/mysql/conf.d -e MYSQL_ROOT_PASSWORD=123456 --name slave --link master:master mysql
-</code></pre>
+ <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -d -p 3307:3306 -v /data/mysqlcnf/slave:/etc/mysql/conf.d -e MYSQL_ROOT_PASSWORD=123456 --name slave --link master:master mysql</span><br></pre></td></tr></table></figure>
 </li>
 <li><p>从库配置文件</p>
-<pre><code class="shell">     [mysqld]
-     server-id              = 2
-
-     log-bin                = mysql-bin
-     binlog-format          = ROW
-     lower_case_table_names = 1
-     log-slave-updates      = 1
-     relay-log              = slave-relay-bin
-     relay-log-index        = slave-relay-bin.index
-     read-only              = 1
-</code></pre>
+ <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">[mysqld]</span><br><span class="line">server-id              = 2</span><br><span class="line"></span><br><span class="line">log-bin                = mysql-bin</span><br><span class="line">binlog-format          = ROW</span><br><span class="line">lower_case_table_names = 1</span><br><span class="line">log-slave-updates      = 1</span><br><span class="line">relay-log              = slave-relay-bin</span><br><span class="line">relay-log-index        = slave-relay-bin.index</span><br><span class="line">read-only              = 1</span><br></pre></td></tr></table></figure>
 <p> log-slave-updates参数的意义在于，如果该库是从库，从主库binlog读取的更新是不会继续写入该库的binlog，设置该参数后则可以实现读取主库binlog之后写入自己库的binlog，用来做其他从库的主库</p>
 </li>
 <li><p>重启容器</p>
-<pre><code class="shell">     docker restart slave
-</code></pre>
+ <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker restart slave</span><br></pre></td></tr></table></figure>
 </li>
 <li><p>登录从库服务器设置主库</p>
-<pre><code class="sql">     CHANGE MASTER TO MASTER_HOST=&#39;master&#39;,MASTER_USER=&#39;sync&#39;, MASTER_PASSWORD=&#39;sync&#39;,MASTER_LOG_FILE=&#39;mysql-bin.000005&#39;, MASTER_LOG_POS=154;
-     flush privileges
-     start slave
-</code></pre>
+ <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CHANGE</span> <span class="keyword">MASTER</span> <span class="keyword">TO</span> MASTER_HOST=<span class="string">'master'</span>,MASTER_USER=<span class="string">'sync'</span>, MASTER_PASSWORD=<span class="string">'sync'</span>,MASTER_LOG_FILE=<span class="string">'mysql-bin.000005'</span>, MASTER_LOG_POS=<span class="number">154</span>;</span><br><span class="line"><span class="keyword">flush</span> <span class="keyword">privileges</span></span><br><span class="line"><span class="keyword">start</span> <span class="keyword">slave</span></span><br></pre></td></tr></table></figure>
 <p> 这里设置的值master_log_file以及master_log_pos根据当初查询主库得来</p>
 </li>
 <li><p>查看从库状态</p>
-<pre><code class="sql">     show slave status\G
-</code></pre>
+ <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">show</span> <span class="keyword">slave</span> <span class="keyword">status</span>\G</span><br></pre></td></tr></table></figure>
 </li>
 </ol>
 <p>至此简单的mysql的主从集群搭建完成</p>
