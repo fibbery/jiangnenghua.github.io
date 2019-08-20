@@ -268,7 +268,7 @@
         
           
         
-        嗯..! 目前共计 11 篇日志。 继续努力。
+        嗯..! 目前共计 7 篇日志。 继续努力。
       </span>
       
 
@@ -465,130 +465,6 @@
 
 
 
-  
-  
-  
-
-  
-  
-
-  <article class="post" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-          <a class="post-title-link" href="/2018/01/15/Dubbo中SPI拓展机制的实现/" itemprop="url">
-            <span itemprop="name">Dubbo中SPI拓展机制的实现</span>
-          </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2018-01-15T23:09:56+08:00"
-              content="2018-01-15">
-          01-15
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
-
-  
-  
-  
-
-  
-  
-
-  <article class="post" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-          <a class="post-title-link" href="/2018/01/09/分析java线程池实现原理/" itemprop="url">
-            <span itemprop="name">分析java线程池实现原理</span>
-          </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2018-01-09T14:46:21+08:00"
-              content="2018-01-09">
-          01-09
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
-
-  
-  
-  
-
-  
-  
-
-  <article class="post" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-          <a class="post-title-link" href="/2018/01/03/ArrayDeque中allocateElements解析/" itemprop="url">
-            <span itemprop="name">ArrayDeque中allocateElements解析</span>
-          </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2018-01-03T21:10:59+08:00"
-              content="2018-01-03">
-          01-03
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
-
-  
-  
-  
-
-  
-  
-
-  <article class="post" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-          <a class="post-title-link" href="/2018/01/03/ReentrantLock(重入锁)以及公平性/" itemprop="url">
-            <span itemprop="name">ReentrantLock(重入锁)以及公平性</span>
-          </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2018-01-03T20:15:00+08:00"
-              content="2018-01-03">
-          01-03
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
-
 
     </div>
   </div>
@@ -632,7 +508,7 @@
         
           <a href="/archives/">
         
-          <span class="site-state-item-count">11</span>
+          <span class="site-state-item-count">7</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -649,11 +525,7 @@
         
           
         
-          
-        
-          
-        
-        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-count">1</span>
         <span class="site-state-item-name">分类</span>
         </a>
       </div>
@@ -686,15 +558,7 @@
         
           
         
-          
-        
-          
-        
-          
-        
-          
-        
-        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-count">9</span>
         <span class="site-state-item-name">标签</span>
         </a>
       </div>
@@ -836,5 +700,30 @@
 
 
   
+
+<script>
+NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+  var GUEST = ['nick', 'mail', 'link'];
+  var guest = 'nick,mail,link';
+  guest = guest.split(',').filter(item => {
+    return GUEST.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#comments',
+    verify: false,
+    notify: true,
+    appId: 'wVgtrusWKN9yXNu0xlLtvwV1-gzGzoHsz',
+    appKey: 'YmrhWjeQyjbw3KSkpOujDj9q',
+    placeholder: '请输入你的留言',
+    avatar: 'mm',
+    meta: guest,
+    pageSize: '10' || 10,
+    visitor: false,
+    lang: 'zh-cn' || 'zh-cn',
+    path: location.pathname
+  });
+}, window.Valine);
+</script>
+
 </body>
 </html>

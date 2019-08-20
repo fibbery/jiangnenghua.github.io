@@ -54,20 +54,18 @@
   };
 </script>
 
-  <meta name="description" content="jdk1.7源码如下">
-<meta name="keywords" content="queue">
-<meta property="og:type" content="article">
-<meta property="og:title" content="ArrayDeque中allocateElements解析">
-<meta property="og:url" content="https://fibbery.github.io/2018/01/03/ArrayDeque中allocateElements解析/index.html">
+  <meta name="description" content="一些开发的2B笔记">
+<meta property="og:type" content="website">
+<meta property="og:title" content="小笔记本">
+<meta property="og:url" content="https://fibbery.github.io/tags/dubbo-netty-java/index.html">
 <meta property="og:site_name" content="小笔记本">
-<meta property="og:description" content="jdk1.7源码如下">
+<meta property="og:description" content="一些开发的2B笔记">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2019-08-20T09:27:46.507Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="ArrayDeque中allocateElements解析">
-<meta name="twitter:description" content="jdk1.7源码如下">
+<meta name="twitter:title" content="小笔记本">
+<meta name="twitter:description" content="一些开发的2B笔记">
   <link rel="alternate" href="/disable" title="小笔记本" type="application/atom+xml">
-  <link rel="canonical" href="https://fibbery.github.io/2018/01/03/ArrayDeque中allocateElements解析/">
+  <link rel="canonical" href="https://fibbery.github.io/tags/dubbo-netty-java/">
 
 
 <script id="page-configurations">
@@ -75,13 +73,13 @@
   CONFIG.page = {
     sidebar: "",
     isHome: false,
-    isPost: true,
+    isPost: false,
     isPage: false,
     isArchive: false
   };
 </script>
 
-  <title>ArrayDeque中allocateElements解析 | 小笔记本</title>
+  <title>标签: dubbo - netty - java | 小笔记本</title>
   <meta name="generator" content="Hexo 3.4.4">
   
 
@@ -237,149 +235,85 @@
         <div class="content-wrap">
             
 
-          <div id="content" class="content page-post-detail">
-            
-
-  <div id="posts" class="posts-expand">
+    
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
     
 
-  <article class="post" itemscope itemtype="http://schema.org/Article">
+  
+
+          <div id="content" class="content ">
+            
+
   
   
   
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://fibbery.github.io/2018/01/03/ArrayDeque中allocateElements解析/">
+  <div class="post-block tag">
 
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Fibbery">
-      <meta itemprop="description" content="一些开发的2B笔记">
-      <meta itemprop="image" content="/assets/img/avatar.jpg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="小笔记本">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">ArrayDeque中allocateElements解析
-
-          
+    <div id="posts" class="posts-collapse">
+      <div class="collection-title">
+        <h1>dubbo - netty - java<small>标签</small>
         </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              
-                
-              
-
-              <time title="创建时间：2018-01-03 21:10:59" itemprop="dateCreated datePublished" datetime="2018-01-03T21:10:59+08:00">2018-01-03</time>
-            </span>
-          
-            
-
-            
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2019-08-20 17:27:46" itemprop="dateModified" datetime="2019-08-20T17:27:46+08:00">2019-08-20</time>
-              </span>
-            
-          
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/java/" itemprop="url" rel="index"><span itemprop="name">java</span></a></span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            <span class="post-meta-item" title="阅读次数">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-eye"></i>
-              </span>
-              <span class="post-meta-item-text">阅读次数：</span>
-              <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
-            </span>
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
+      </div>
 
       
-        <p>jdk1.7源码如下</p>
-<a id="more"></a>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">allocateElements</span><span class="params">(<span class="keyword">int</span> numElements)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> initialCapacity = MIN_INITIAL_CAPACITY;</span><br><span class="line">        <span class="comment">// Find the best power of two to hold elements.</span></span><br><span class="line">        <span class="comment">// Tests "&lt;=" because arrays aren't kept full.</span></span><br><span class="line">        <span class="keyword">if</span> (numElements &gt;= initialCapacity) &#123;</span><br><span class="line">            initialCapacity = numElements;</span><br><span class="line">            initialCapacity |= (initialCapacity &gt;&gt;&gt;  <span class="number">1</span>);</span><br><span class="line">            initialCapacity |= (initialCapacity &gt;&gt;&gt;  <span class="number">2</span>);</span><br><span class="line">            initialCapacity |= (initialCapacity &gt;&gt;&gt;  <span class="number">4</span>);</span><br><span class="line">            initialCapacity |= (initialCapacity &gt;&gt;&gt;  <span class="number">8</span>);</span><br><span class="line">            initialCapacity |= (initialCapacity &gt;&gt;&gt; <span class="number">16</span>);</span><br><span class="line">            initialCapacity++;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (initialCapacity &lt; <span class="number">0</span>)   </span><br><span class="line">            <span class="comment">// Too many elements, must back off</span></span><br><span class="line">            initialCapacity &gt;&gt;&gt;= <span class="number">1</span>;<span class="comment">// Good luck allocating 2 ^ 30 elements</span></span><br><span class="line">        &#125;</span><br><span class="line">        elements = (E[]) <span class="keyword">new</span> Object[initialCapacity];</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
-<!-- more -->
-<p>方法目的在于，当numElements 小于 initialCapacity的时候，直接取默认值 initialCapacity，而大于默认值的时候取 n = 2^k (k 为 32 以内的整数) ，此时 n &gt; numElements。<br>下面简单分析代码：<br>假设 a = 1xxxxxxx xxxxxxxx  (2进制表示 1表示该数的最高位, x代表0或者1)<br>a | a &gt;&gt;&gt; 1    =  11xxxxxx xxxxxxxx  (最高两位为11)<br>a | a &gt;&gt;&gt; 2    =  1111xxxx xxxxxxxx<br>a | a &gt;&gt;&gt; 4    =  11111111 xxxxxxxx<br>a | a &gt;&gt;&gt; 8    =  11111111 11111111<br>……..<br>最终的目的是将表示该数的最高位的1复制到接下来的1位、2位、4位直到16位,保证接下来a的低位全部是1，在加1一位导致高位左移，其余位数变成0，并且是2^k。</p>
+
+  
+  
+  
+
+  
+    
+    <div class="collection-title">
+      <h1 class="archive-year" id="archive-year-2018">2018</h1>
+    </div>
+  
+  
+
+  <article class="post" itemscope itemtype="http://schema.org/Article">
+    <header class="post-header">
+
+      <h2 class="post-title">
+        
+          <a class="post-title-link" href="/2018/03/03/Dubbo通信实现/" itemprop="url">
+            <span itemprop="name">Dubbo通信实现</span>
+          </a>
+        
+      </h2>
+
+      <div class="post-meta">
+        <time class="post-time" itemprop="dateCreated"
+              datetime="2018-03-03T21:28:03+08:00"
+              content="2018-03-03">
+          03-03
+        </time>
+      </div>
+
+    </header>
+  </article>
+
+
 
     </div>
 
-    
-    
-    
-        
-      
-
-      <footer class="post-footer">
-          
-            
-          
-          <div class="post-tags">
-            
-              <a href="/tags/queue/" rel="tag"># queue</a>
-            
-          </div>
-        
-
-        
-
-          <div class="post-nav">
-            <div class="post-nav-next post-nav-item">
-              
-                <a href="/2018/01/03/ReentrantLock(重入锁)以及公平性/" rel="next" title="ReentrantLock(重入锁)以及公平性">
-                  <i class="fa fa-chevron-left"></i> ReentrantLock(重入锁)以及公平性
-                </a>
-              
-            </div>
-
-            <span class="post-nav-divider"></span>
-
-            <div class="post-nav-prev post-nav-item">
-              
-                <a href="/2018/01/09/分析java线程池实现原理/" rel="prev" title="分析java线程池实现原理">
-                  分析java线程池实现原理 <i class="fa fa-chevron-right"></i>
-                </a>
-              
-            </div>
-          </div>
-        
-      </footer>
-    
   </div>
   
   
   
-  </article>
 
-  </div>
+  
+
 
 
           </div>
@@ -414,7 +348,7 @@
         
           <a href="/archives/">
         
-          <span class="site-state-item-count">11</span>
+          <span class="site-state-item-count">7</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -431,11 +365,7 @@
         
           
         
-          
-        
-          
-        
-        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-count">1</span>
         <span class="site-state-item-name">分类</span>
         </a>
       </div>
@@ -468,15 +398,7 @@
         
           
         
-          
-        
-          
-        
-          
-        
-          
-        
-        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-count">9</span>
         <span class="site-state-item-name">标签</span>
         </a>
       </div>
@@ -618,8 +540,30 @@
 
 
   
-  <script src="/js/scrollspy.js?v=7.3.0"></script><script src="/js/post-details.js?v=7.3.0"></script>
 
+<script>
+NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+  var GUEST = ['nick', 'mail', 'link'];
+  var guest = 'nick,mail,link';
+  guest = guest.split(',').filter(item => {
+    return GUEST.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#comments',
+    verify: false,
+    notify: true,
+    appId: 'wVgtrusWKN9yXNu0xlLtvwV1-gzGzoHsz',
+    appKey: 'YmrhWjeQyjbw3KSkpOujDj9q',
+    placeholder: '请输入你的留言',
+    avatar: 'mm',
+    meta: guest,
+    pageSize: '10' || 10,
+    visitor: false,
+    lang: 'zh-cn' || 'zh-cn',
+    path: location.pathname
+  });
+}, window.Valine);
+</script>
 
 </body>
 </html>
