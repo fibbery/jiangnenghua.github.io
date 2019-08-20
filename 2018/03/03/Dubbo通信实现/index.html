@@ -342,7 +342,7 @@
 <h2 id="具体实现"><a href="#具体实现" class="headerlink" title="具体实现"></a>具体实现</h2><h3 id="暴露服务"><a href="#暴露服务" class="headerlink" title="暴露服务"></a>暴露服务</h3><p>首先我们看下协议接口类Protocol中暴露服务的方法</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 暴露远程调用服务：</span></span><br><span class="line"><span class="comment"> * 1. 该通信协议必须在接到请求之后记录请求的源地址：</span></span><br><span class="line"><span class="comment"> *		RpcContext.getContext().setRemoteAddress()</span></span><br><span class="line"><span class="comment"> * 2. export必须是幂等的。意味着使用相同的URL不论是调用一次还是调用两次，结果都是一样的</span></span><br><span class="line"><span class="comment"> * 3. invoker实例是由框架实现的，跟协议没任何关系</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> T 服务的类型</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> invoker 服务实现的实例</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@return</span> 返回被暴露服务实例的引用，用于取消服务</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@Adaptive</span></span><br><span class="line">&lt;T&gt; <span class="function">Exporter&lt;T&gt; <span class="title">export</span><span class="params">(Invoker&lt;T&gt; invoker)</span> <span class="keyword">throws</span> RpcException</span>;</span><br></pre></td></tr></table></figure>
 <p>然后我们看分析dubbo协议的暴露服务的具体实现DubboProtocol.export的过程如下</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">export ---&gt; openServer ---&gt; createServer ---&gt;  Exchangers.bind(url,handler)</span><br></pre></td></tr></table></figure>
+<figure class="highlight xl"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="title">export</span> ---&gt;</span> <span class="function"><span class="title">openServer</span> ---&gt;</span> <span class="function"><span class="title">createServer</span> ---&gt;</span>  Exchangers.bind(url,handler)</span><br></pre></td></tr></table></figure>
 <p>openServer根据invoker携带的URL信息获取host以及ip，如果已经存在，则不会创建服务。<br>然后我们继续看下<em>Exchanger</em>的实现</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> ExchangeServer <span class="title">bind</span><span class="params">(URL url, ExchangeHandler handler)</span> <span class="keyword">throws</span> RemotingException </span>&#123;</span><br><span class="line">       <span class="keyword">if</span> (url == <span class="keyword">null</span>) &#123;</span><br><span class="line">           <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(<span class="string">"url == null"</span>);</span><br><span class="line">       &#125;</span><br><span class="line">       <span class="keyword">if</span> (handler == <span class="keyword">null</span>) &#123;</span><br><span class="line">           <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(<span class="string">"handler == null"</span>);</span><br><span class="line">       &#125;</span><br><span class="line">       url = url.addParameterIfAbsent(Constants.CODEC_KEY, <span class="string">"exchange"</span>);</span><br><span class="line">       <span class="keyword">return</span> getExchanger(url).bind(url, handler);</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
 <p><em>getExchanger(url)</em>典型的策略模式，得到HeaderExchanger，代码如下</p>
@@ -462,7 +462,7 @@
         
           <a href="/archives/">
         
-          <span class="site-state-item-count">7</span>
+          <span class="site-state-item-count">11</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -512,7 +512,17 @@
         
           
         
-        <span class="site-state-item-count">9</span>
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+        <span class="site-state-item-count">14</span>
         <span class="site-state-item-name">标签</span>
         </a>
       </div>

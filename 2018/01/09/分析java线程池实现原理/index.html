@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+
+
+
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.3.0">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.3.0">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.3.0">
+  <link rel="mask-icon" href="/images/logo.svg?v=7.3.0" color="#222">
+
+<link rel="stylesheet" href="/css/main.css?v=7.3.0">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Monda:300,300italic,400,400italic,700,700italic|Roboto Slab:300,300italic,400,400italic,700,700italic|PT Mono:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.7.0">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.3.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false},
+    copycode: {"enable":true,"show_result":true,"style":"mac"},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: 'DA3PID79SP',
+      apiKey: '9708e54cffa2422172583ac9329b544e',
+      indexName: 'blog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    translation: {
+      copy_button: '复制',
+      copy_success: '复制成功',
+      copy_failure: '复制失败'
+    }
+  };
+</script>
+
+  <meta name="description" content="背景线程是稀缺资源，如果无限制创建会消耗大量系统资源，同时也不利于管理。线程池的出现就是为了解决这类问题。">
+<meta name="keywords" content="java,concurrent">
+<meta property="og:type" content="article">
+<meta property="og:title" content="分析java线程池实现原理">
+<meta property="og:url" content="https://fibbery.github.io/2018/01/09/分析java线程池实现原理/index.html">
+<meta property="og:site_name" content="小笔记本">
+<meta property="og:description" content="背景线程是稀缺资源，如果无限制创建会消耗大量系统资源，同时也不利于管理。线程池的出现就是为了解决这类问题。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://fibbery.github.io/assets/blogImg/threadpoolexecutor.png">
+<meta property="og:updated_time" content="2019-08-20T10:35:31.774Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="分析java线程池实现原理">
+<meta name="twitter:description" content="背景线程是稀缺资源，如果无限制创建会消耗大量系统资源，同时也不利于管理。线程池的出现就是为了解决这类问题。">
+<meta name="twitter:image" content="https://fibbery.github.io/assets/blogImg/threadpoolexecutor.png">
+  <link rel="alternate" href="/disable" title="小笔记本" type="application/atom+xml">
+  <link rel="canonical" href="https://fibbery.github.io/2018/01/09/分析java线程池实现原理/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>分析java线程池实现原理 | 小笔记本</title>
+  <meta name="generator" content="Hexo 3.4.4">
+  
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+  <div class="container">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">小笔记本</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">好风凭借力，送我上青云</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+      
+      
+      
+        
+        <li class="menu-item menu-item-home">
+      
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+      
+      
+      
+        
+        <li class="menu-item menu-item-tags">
+      
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+      
+      
+      
+        
+        <li class="menu-item menu-item-categories">
+      
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+      
+      
+      
+        
+        <li class="menu-item menu-item-archives">
+      
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a href="javascript:;" class="popup-trigger">
+        
+          <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+      </li>
+    
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input" id="search-input"></div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="algolia-results">
+  <div id="algolia-stats"></div>
+  <div id="algolia-hits"></div>
+  <div id="algolia-pagination" class="algolia-pagination"></div>
+</div>
+
+  
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+            
+
+          <div id="content" class="content page-post-detail">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  <article class="post" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://fibbery.github.io/2018/01/09/分析java线程池实现原理/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Fibbery">
+      <meta itemprop="description" content="一些开发的2B笔记">
+      <meta itemprop="image" content="/assets/img/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小笔记本">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">分析java线程池实现原理
+
+          
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              
+                
+              
+
+              <time title="创建时间：2018-01-09 14:46:21" itemprop="dateCreated datePublished" datetime="2018-01-09T14:46:21+08:00">2018-01-09</time>
+            </span>
+          
+            
+
+            
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2019-08-20 18:35:31" itemprop="dateModified" datetime="2019-08-20T18:35:31+08:00">2019-08-20</time>
+              </span>
+            
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/学习笔记/" itemprop="url" rel="index"><span itemprop="name">学习笔记</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            <span class="post-meta-item" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+        
+      
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2018/01/09/分析java线程池实现原理/#comments" itemprop="discussionUrl"><span class="post-comments-count valine-comment-count" data-xid="/2018/01/09/分析java线程池实现原理/" itemprop="commentCount"></span></a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>线程是稀缺资源，如果无限制创建会消耗大量系统资源，同时也不利于管理。线程池的出现就是为了解决这类问题。</p>
+<a id="more"></a>
+<h2 id="代码解析"><a href="#代码解析" class="headerlink" title="代码解析"></a>代码解析</h2><h3 id="构造参数解析"><a href="#构造参数解析" class="headerlink" title="构造参数解析"></a>构造参数解析</h3><p>通常我们使用Executors这个工厂类来快速初始化一个符合要求的线程池，其实本质都是通过不同的参数实例化ThreadPoolExecutor，下面我们通过jdk文档来了解各个参数的意思，源码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">    * Creates a new &#123;<span class="doctag">@code</span> ThreadPoolExecutor&#125; with the given initial</span></span><br><span class="line"><span class="comment">    * parameters.</span></span><br><span class="line"><span class="comment">    *</span></span><br><span class="line"><span class="comment">    * <span class="doctag">@param</span> corePoolSize the number of threads to keep in the pool, even</span></span><br><span class="line"><span class="comment">    *        if they are idle, unless &#123;<span class="doctag">@code</span> allowCoreThreadTimeOut&#125; is set</span></span><br><span class="line"><span class="comment">    * <span class="doctag">@param</span> maximumPoolSize the maximum number of threads to allow in the</span></span><br><span class="line"><span class="comment">    *        pool</span></span><br><span class="line"><span class="comment">    * <span class="doctag">@param</span> keepAliveTime when the number of threads is greater than</span></span><br><span class="line"><span class="comment">    *        the core, this is the maximum time that excess idle threads</span></span><br><span class="line"><span class="comment">    *        will wait for new tasks before terminating.</span></span><br><span class="line"><span class="comment">    * <span class="doctag">@param</span> unit the time unit for the &#123;<span class="doctag">@code</span> keepAliveTime&#125; argument</span></span><br><span class="line"><span class="comment">    * <span class="doctag">@param</span> workQueue the queue to use for holding tasks before they are</span></span><br><span class="line"><span class="comment">    *        executed.  This queue will hold only the &#123;<span class="doctag">@code</span> Runnable&#125;</span></span><br><span class="line"><span class="comment">    *        tasks submitted by the &#123;<span class="doctag">@code</span> execute&#125; method.</span></span><br><span class="line"><span class="comment">    * <span class="doctag">@param</span> threadFactory the factory to use when the executor</span></span><br><span class="line"><span class="comment">    *        creates a new thread</span></span><br><span class="line"><span class="comment">    * <span class="doctag">@param</span> handler the handler to use when execution is blocked</span></span><br><span class="line"><span class="comment">    *        because the thread bounds and queue capacities are reached</span></span><br><span class="line"><span class="comment">    * <span class="doctag">@throws</span> IllegalArgumentException if one of the following holds:&lt;br&gt;</span></span><br><span class="line"><span class="comment">    *         &#123;<span class="doctag">@code</span> corePoolSize &lt; 0&#125;&lt;br&gt;</span></span><br><span class="line"><span class="comment">    *         &#123;<span class="doctag">@code</span> keepAliveTime &lt; 0&#125;&lt;br&gt;</span></span><br><span class="line"><span class="comment">    *         &#123;<span class="doctag">@code</span> maximumPoolSize &lt;= 0&#125;&lt;br&gt;</span></span><br><span class="line"><span class="comment">    *         &#123;<span class="doctag">@code</span> maximumPoolSize &lt; corePoolSize&#125;</span></span><br><span class="line"><span class="comment">    * <span class="doctag">@throws</span> NullPointerException if &#123;<span class="doctag">@code</span> workQueue&#125;</span></span><br><span class="line"><span class="comment">    *         or &#123;<span class="doctag">@code</span> threadFactory&#125; or &#123;<span class="doctag">@code</span> handler&#125; is null</span></span><br><span class="line"><span class="comment">    */</span></span><br><span class="line">   <span class="function"><span class="keyword">public</span> <span class="title">ThreadPoolExecutor</span><span class="params">(<span class="keyword">int</span> corePoolSize,</span></span></span><br><span class="line"><span class="function"><span class="params">                             <span class="keyword">int</span> maximumPoolSize,</span></span></span><br><span class="line"><span class="function"><span class="params">                             <span class="keyword">long</span> keepAliveTime,</span></span></span><br><span class="line"><span class="function"><span class="params">                             TimeUnit unit,</span></span></span><br><span class="line"><span class="function"><span class="params">                             BlockingQueue&lt;Runnable&gt; workQueue,</span></span></span><br><span class="line"><span class="function"><span class="params">                             ThreadFactory threadFactory,</span></span></span><br><span class="line"><span class="function"><span class="params">                             RejectedExecutionHandler handler)</span> </span>&#123;</span><br><span class="line">       <span class="keyword">if</span> (corePoolSize &lt; <span class="number">0</span> ||</span><br><span class="line">           maximumPoolSize &lt;= <span class="number">0</span> ||</span><br><span class="line">           maximumPoolSize &lt; corePoolSize ||</span><br><span class="line">           keepAliveTime &lt; <span class="number">0</span>)</span><br><span class="line">           <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException();</span><br><span class="line">       <span class="keyword">if</span> (workQueue == <span class="keyword">null</span> || threadFactory == <span class="keyword">null</span> || handler == <span class="keyword">null</span>)</span><br><span class="line">           <span class="keyword">throw</span> <span class="keyword">new</span> NullPointerException();</span><br><span class="line">       <span class="keyword">this</span>.acc = System.getSecurityManager() == <span class="keyword">null</span> ?</span><br><span class="line">               <span class="keyword">null</span> :</span><br><span class="line">               AccessController.getContext();</span><br><span class="line">       <span class="keyword">this</span>.corePoolSize = corePoolSize;</span><br><span class="line">       <span class="keyword">this</span>.maximumPoolSize = maximumPoolSize;</span><br><span class="line">       <span class="keyword">this</span>.workQueue = workQueue;</span><br><span class="line">       <span class="keyword">this</span>.keepAliveTime = unit.toNanos(keepAliveTime);</span><br><span class="line">       <span class="keyword">this</span>.threadFactory = threadFactory;</span><br><span class="line">       <span class="keyword">this</span>.handler = handler;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+<h4 id="corePoolSize"><a href="#corePoolSize" class="headerlink" title="corePoolSize"></a>corePoolSize</h4><p>核心线程数，如果线程池中创建了核心线程，那么他们会一直存活(即使空闲)。如果你将allowCoreThreadTimeOut设置为true的话，那么空闲的核心线程才会被终止。如果你执行了prestartAllCoreThreads()，会提前启动所有核心线程。</p>
+<h4 id="maximumPoolSize"><a href="#maximumPoolSize" class="headerlink" title="maximumPoolSize"></a>maximumPoolSize</h4><p>线程池中能持有的最大线程数</p>
+<h4 id="keepAliveTime"><a href="#keepAliveTime" class="headerlink" title="keepAliveTime"></a>keepAliveTime</h4><p>超过核心线程数的那部分线程最大空闲时间</p>
+<h4 id="unit"><a href="#unit" class="headerlink" title="unit"></a>unit</h4><p>keepAliveTime的时间单位</p>
+<h4 id="workQueue"><a href="#workQueue" class="headerlink" title="workQueue"></a>workQueue</h4><p>保存用户被执行任务的队列，现有的几种阻塞队列如下：</p>
+<ol>
+<li>ArrayBlockingQueue</li>
+<li>LinkedBlockingQueue</li>
+<li>SynchronousQuene</li>
+<li>PriorityBlockingQueue</li>
+</ol>
+<h4 id="threadFactory"><a href="#threadFactory" class="headerlink" title="threadFactory"></a>threadFactory</h4><p>创建线程的工厂类</p>
+<h4 id="handler"><a href="#handler" class="headerlink" title="handler"></a>handler</h4><p>当线程执行阻塞或者容量已经到达限度时，需要执行的策略处理方式。现有的处理方式如下：</p>
+<ol>
+<li>AbortPolicy：直接抛出异常(默认策略)</li>
+<li>CallerRunsPolicy：用调用者所在的线程来执行任务</li>
+<li>DiscardOldestPolicy：去掉队列中最老的任务，再次调用ThreadPoolExecutor.execute执行该任务</li>
+<li>DiscardPolicy：直接抛弃该任务，不做任何操作</li>
+</ol>
+<h3 id="执行任务"><a href="#执行任务" class="headerlink" title="执行任务"></a>执行任务</h3><p>提交我们需要执行的任务通常使用ThreadPoolExecutor.execute(Runnable r)，源码如下<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">execute</span><span class="params">(Runnable command)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (command == <span class="keyword">null</span>)</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> NullPointerException();</span><br><span class="line">        <span class="keyword">int</span> c = ctl.get();</span><br><span class="line">        <span class="keyword">if</span> (workerCountOf(c) &lt; corePoolSize) &#123;</span><br><span class="line">            <span class="keyword">if</span> (addWorker(command, <span class="keyword">true</span>))</span><br><span class="line">                <span class="keyword">return</span>;</span><br><span class="line">            c = ctl.get();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (isRunning(c) &amp;&amp; workQueue.offer(command)) &#123;</span><br><span class="line">            <span class="keyword">int</span> recheck = ctl.get();</span><br><span class="line">            <span class="keyword">if</span> (! isRunning(recheck) &amp;&amp; remove(command))</span><br><span class="line">                reject(command);</span><br><span class="line">            <span class="keyword">else</span> <span class="keyword">if</span> (workerCountOf(recheck) == <span class="number">0</span>)</span><br><span class="line">                addWorker(<span class="keyword">null</span>, <span class="keyword">false</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (!addWorker(command, <span class="keyword">false</span>))</span><br><span class="line">            reject(command);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure></p>
+<p>上述ctl这个变量的作用在于获取当前线程池运行状态以及当前线程数(稍后详细说明)<br>通过上面可以将执行的流程分成三部分：</p>
+<ol>
+<li>如果当前工作线程少于corePoolSize，则添加新的核心线程来执行任务，addworker方法会自动检查线程池运行状态以及工作线程数目并且通过返回值来通知是否成功创建线程。</li>
+<li>线程数大于corePoolSize的时候，我们会优先将任务送入workQueue。同时我们仍然需要对线程池状态以及线程数进行二次检查，避免进入该方法时该线程池已经停止接受任务，这时需要将任务从队列中移除并且执行reject操作。如果此时线程池中无可用线程，会创建一个空的非核心线程。</li>
+<li>如果不能往队列中送入任务，那么会让线程池创建一个非核心的线程来执行任务。如果没有创建成功，则执行reject操作。</li>
+</ol>
+<p>具体流程图如下：<br><img src="/assets/blogImg/threadpoolexecutor.png" alt="execute执行流程"></p>
+<p>后续更新…</p>
+
+    </div>
+
+    
+    
+    
+        
+      
+
+      <footer class="post-footer">
+          
+            
+          
+          <div class="post-tags">
+            
+              <a href="/tags/java/" rel="tag"># java</a>
+            
+              <a href="/tags/concurrent/" rel="tag"># concurrent</a>
+            
+          </div>
+        
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+              
+                <a href="/2018/01/03/ArrayDeque中allocateElements解析/" rel="next" title="ArrayDeque中allocateElements解析">
+                  <i class="fa fa-chevron-left"></i> ArrayDeque中allocateElements解析
+                </a>
+              
+            </div>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+              
+                <a href="/2018/01/15/Dubbo中SPI拓展机制的实现/" rel="prev" title="Dubbo中SPI拓展机制的实现">
+                  Dubbo中SPI拓展机制的实现 <i class="fa fa-chevron-right"></i>
+                </a>
+              
+            </div>
+          </div>
+        
+      </footer>
+    
+  </div>
+  
+  
+  
+  </article>
+
+  </div>
+
+
+          </div>
+          
+    
+    <div class="comments" id="comments"></div>
+  
+
+        </div>
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image"
+      src="/assets/img/avatar.jpg"
+      alt="Fibbery">
+  <p class="site-author-name" itemprop="name">Fibbery</p>
+  <div class="site-description motion-element" itemprop="description">一些开发的2B笔记</div>
+</div>
+  <nav class="site-state motion-element">
+      <div class="site-state-item site-state-posts">
+        
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">11</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+    
+      
+      
+      <div class="site-state-item site-state-categories">
+        
+          
+            <a href="/categories/">
+          
+        
+        
+        
+          
+        
+        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-name">分类</span>
+        </a>
+      </div>
+    
+      
+      
+      <div class="site-state-item site-state-tags">
+        
+          
+            <a href="/tags/">
+          
+        
+        
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">标签</span>
+        </a>
+      </div>
+    
+  </nav>
+  <div class="feed-link motion-element">
+    <a href="/disable" rel="alternate">
+      <i class="fa fa-rss"></i>RSS
+    </a>
+  </div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+      
+      
+        
+      
+      
+        
+      
+        <a href="https://github.com/jiangnenghua" title="GitHub &rarr; https://github.com/jiangnenghua" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+    
+  </div>
+
+
+
+
+        </div>
+      </div>
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#背景"><span class="nav-number">1.</span> <span class="nav-text">背景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#代码解析"><span class="nav-number">2.</span> <span class="nav-text">代码解析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#构造参数解析"><span class="nav-number">2.1.</span> <span class="nav-text">构造参数解析</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#corePoolSize"><span class="nav-number">2.1.1.</span> <span class="nav-text">corePoolSize</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#maximumPoolSize"><span class="nav-number">2.1.2.</span> <span class="nav-text">maximumPoolSize</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#keepAliveTime"><span class="nav-number">2.1.3.</span> <span class="nav-text">keepAliveTime</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#unit"><span class="nav-number">2.1.4.</span> <span class="nav-text">unit</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#workQueue"><span class="nav-number">2.1.5.</span> <span class="nav-text">workQueue</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#threadFactory"><span class="nav-number">2.1.6.</span> <span class="nav-text">threadFactory</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#handler"><span class="nav-number">2.1.7.</span> <span class="nav-text">handler</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#执行任务"><span class="nav-number">2.2.</span> <span class="nav-text">执行任务</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Fibbery</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.4.4</div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">主题 – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> v7.3.0</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-user"></i>
+    </span>
+    <span class="site-uv" title="总访客量">
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+    <span class="post-meta-divider">|</span>
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-eye"></i>
+    </span>
+    <span class="site-pv" title="总访问量">
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        <span>0%</span>
+      </div>
+
+    
+
+  </div>
+
+  
+  <script src="/lib/jquery/index.js?v=3.4.1"></script>
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+<script src="/js/utils.js?v=7.3.0"></script><script src="/js/motion.js?v=7.3.0"></script>
+<script src="/js/schemes/pisces.js?v=7.3.0"></script>
+
+<script src="/js/next-boot.js?v=7.3.0"></script>
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/instantsearch.js@2/dist/instantsearch.min.css">
+<script src="//cdn.jsdelivr.net/npm/instantsearch.js@2/dist/instantsearch.min.js"></script><script src="/js/algolia-search.js?v=7.3.0"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+
+  
+  <script src="/js/scrollspy.js?v=7.3.0"></script><script src="/js/post-details.js?v=7.3.0"></script>
+
+
+
+<script>
+NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+  var GUEST = ['nick', 'mail', 'link'];
+  var guest = 'nick,mail,link';
+  guest = guest.split(',').filter(item => {
+    return GUEST.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#comments',
+    verify: false,
+    notify: true,
+    appId: 'wVgtrusWKN9yXNu0xlLtvwV1-gzGzoHsz',
+    appKey: 'YmrhWjeQyjbw3KSkpOujDj9q',
+    placeholder: '请输入你的留言',
+    avatar: 'mm',
+    meta: guest,
+    pageSize: '10' || 10,
+    visitor: false,
+    lang: 'zh-cn' || 'zh-cn',
+    path: location.pathname
+  });
+}, window.Valine);
+</script>
+
+</body>
+</html>

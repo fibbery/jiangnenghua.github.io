@@ -54,19 +54,22 @@
   };
 </script>
 
-  <meta name="description" content="一些开发的2B笔记">
-<meta property="og:type" content="website">
-<meta property="og:title" content="分类">
-<meta property="og:url" content="https://fibbery.github.io/categories/index.html">
+  <meta name="description" content="简介ReentrantLock的实现可以替代隐式的synchronized关键字，而且能够提供超过关键字本身的多种功能。这里有一个锁获取的公平性问题，如果在绝对时间上，先对锁进行获取的请求一定先被满足，那么这个锁就是公平的，反之，是不公平的，也就是说等待时间最长的线程最有机会获取锁，也可以说锁的获取是有序的。ReentrantLock提供了一个构造函数，能够控制这个锁是否公平。而锁的名字也是说明了">
+<meta name="keywords" content="java,concurrent,synchronize">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ReentrantLock(重入锁)以及公平性">
+<meta property="og:url" content="https://fibbery.github.io/2018/01/03/ReentrantLock(重入锁)以及公平性/index.html">
 <meta property="og:site_name" content="小笔记本">
-<meta property="og:description" content="一些开发的2B笔记">
+<meta property="og:description" content="简介ReentrantLock的实现可以替代隐式的synchronized关键字，而且能够提供超过关键字本身的多种功能。这里有一个锁获取的公平性问题，如果在绝对时间上，先对锁进行获取的请求一定先被满足，那么这个锁就是公平的，反之，是不公平的，也就是说等待时间最长的线程最有机会获取锁，也可以说锁的获取是有序的。ReentrantLock提供了一个构造函数，能够控制这个锁是否公平。而锁的名字也是说明了">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2019-08-20T07:36:17.136Z">
+<meta property="og:image" content="https://fibbery.github.io/assets/blogImg/reentranlock-img01.png">
+<meta property="og:updated_time" content="2019-08-20T10:37:12.839Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="分类">
-<meta name="twitter:description" content="一些开发的2B笔记">
+<meta name="twitter:title" content="ReentrantLock(重入锁)以及公平性">
+<meta name="twitter:description" content="简介ReentrantLock的实现可以替代隐式的synchronized关键字，而且能够提供超过关键字本身的多种功能。这里有一个锁获取的公平性问题，如果在绝对时间上，先对锁进行获取的请求一定先被满足，那么这个锁就是公平的，反之，是不公平的，也就是说等待时间最长的线程最有机会获取锁，也可以说锁的获取是有序的。ReentrantLock提供了一个构造函数，能够控制这个锁是否公平。而锁的名字也是说明了">
+<meta name="twitter:image" content="https://fibbery.github.io/assets/blogImg/reentranlock-img01.png">
   <link rel="alternate" href="/disable" title="小笔记本" type="application/atom+xml">
-  <link rel="canonical" href="https://fibbery.github.io/categories/">
+  <link rel="canonical" href="https://fibbery.github.io/2018/01/03/ReentrantLock(重入锁)以及公平性/">
 
 
 <script id="page-configurations">
@@ -74,13 +77,13 @@
   CONFIG.page = {
     sidebar: "",
     isHome: false,
-    isPost: false,
-    isPage: true,
+    isPost: true,
+    isPage: false,
     isArchive: false
   };
 </script>
 
-  <title>分类 | 小笔记本</title>
+  <title>ReentrantLock(重入锁)以及公平性 | 小笔记本</title>
   <meta name="generator" content="Hexo 3.4.4">
   
 
@@ -236,75 +239,166 @@
         <div class="content-wrap">
             
 
-    
-    
-      
-      
-    
-      
-      
-    
-      
-      
-    
-      
-      
-    
-    
-
-  
-
           <div id="content" class="content page-post-detail">
             
 
   <div id="posts" class="posts-expand">
     
-    
-    
-    <div class="post-block page">
+
+  <article class="post" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://fibbery.github.io/2018/01/03/ReentrantLock(重入锁)以及公平性/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Fibbery">
+      <meta itemprop="description" content="一些开发的2B笔记">
+      <meta itemprop="image" content="/assets/img/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="小笔记本">
+    </span>
       <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">ReentrantLock(重入锁)以及公平性
 
-<h1 class="post-title" itemprop="name headline">分类
+          
+        </h1>
 
-</h1>
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
 
-<div class="post-meta">
+              
+                
+              
+
+              <time title="创建时间：2018-01-03 20:15:00" itemprop="dateCreated datePublished" datetime="2018-01-03T20:15:00+08:00">2018-01-03</time>
+            </span>
+          
+            
+
+            
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2019-08-20 18:37:12" itemprop="dateModified" datetime="2019-08-20T18:37:12+08:00">2019-08-20</time>
+              </span>
+            
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/学习笔记/" itemprop="url" rel="index"><span itemprop="name">学习笔记</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            <span class="post-meta-item" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+        
+      
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2018/01/03/ReentrantLock(重入锁)以及公平性/#comments" itemprop="discussionUrl"><span class="post-comments-count valine-comment-count" data-xid="/2018/01/03/ReentrantLock(重入锁)以及公平性/" itemprop="commentCount"></span></a>
+  </span>
+  
   
 
-</div>
+        </div>
+      </header>
 
-</header>
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
 
       
-      
-      
-      <div class="post-body">
+        <h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>ReentrantLock的实现可以替代隐式的synchronized关键字，而且能够提供超过关键字本身的多种功能。<br>这里有一个锁获取的公平性问题，如果在绝对时间上，先对锁进行获取的请求一定先被满足，那么这个锁就是公平的，反之，是不公平的，也就是说等待时间最长的线程最有机会获取锁，也可以说锁的获取是有序的。ReentrantLock提供了一个构造函数，能够控制这个锁是否公平。而锁的名字也是说明了这个锁具备重复进入的可能，也就是说能让当前线程多次的进行对锁的获取操作，这样的最大次数是限制是Integer.MAX_VALUE,约21次左右。<br>事实上公平的锁机制没有非公平的效率高，因为公平的获取锁没有考虑到操作系统对线程的调度因素，这样造成JVM对于等待中的线程调度次序和操作系统对线程的调度之间的不匹配。对于锁的快速且重复获取过程中，连续获取的概率是非常高的，而公平锁会压制这种情况，虽然公平性得以保障，但是响应比却下降了。</p>
+<a id="more"></a>
+<h2 id="实现分析"><a href="#实现分析" class="headerlink" title="实现分析"></a>实现分析</h2><p>代码结构如下：<br><img src="/assets/blogImg/reentranlock-img01.png" alt="代码结构"></p>
+<p>ReentrantLock持有一个Sync对象,该对象实现了AbstractQueuedSynchronizer，而Sync有两个具化实现类FairSync和NonfairSync。<br>Sync(AbstractQueueSynchronizer)中持有两个Node对象tail和head来维持一张等待线程的链表。</p>
+<p>FairSync和NonfairSync的具体区别点在于：</p>
+<ol>
+<li>lock的时候,FairSync直接调用的acquire(1),当前线程直接进入等待链表中，而NonfairSync则是优先通过compareAndSetState尝试去获取一次锁(修改当前锁的状态)，如果成功则直接拿到锁，不成功则调用acquire(1)进入等待队列。</li>
+<li>tryAcquire时候，FairSync先通过判断前面没有等待线程的时候在进行尝试获取锁，而NonfairSync直接就尝试获取。FairSync执行的顺序完全安装等待队列中的顺序执行，而NonfairSync则是打破这种规则先直接获取，获取的到就可以，获取不到才进入等待队列。</li>
+</ol>
+
+    </div>
+
+    
+    
+    
         
-          <div class="category-all-page">
-            <div class="category-all-title">
+      
+
+      <footer class="post-footer">
+          
+            
+          
+          <div class="post-tags">
+            
+              <a href="/tags/java/" rel="tag"># java</a>
+            
+              <a href="/tags/concurrent/" rel="tag"># concurrent</a>
+            
+              <a href="/tags/synchronize/" rel="tag"># synchronize</a>
+            
+          </div>
+        
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
               
-              
-                
-                  
-                
-              
-              目前共计 1 个分类
             </div>
-            <div class="category-all">
-              <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/学习笔记/">学习笔记</a><span class="category-list-count">11</span></li></ul>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+              
+                <a href="/2018/01/03/ArrayDeque中allocateElements解析/" rel="prev" title="ArrayDeque中allocateElements解析">
+                  ArrayDeque中allocateElements解析 <i class="fa fa-chevron-right"></i>
+                </a>
+              
             </div>
           </div>
         
-      </div>
-      
-      
-      
-    </div>
+      </footer>
     
+  </div>
+  
+  
+  
+  </article>
 
-    
-    
-    
   </div>
 
 
@@ -327,8 +421,17 @@
 
   <aside id="sidebar" class="sidebar">
     <div class="sidebar-inner">
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <div class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <div class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
 
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -433,6 +536,23 @@
 
         </div>
       </div>
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#简介"><span class="nav-number">1.</span> <span class="nav-text">简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#实现分析"><span class="nav-number">2.</span> <span class="nav-text">实现分析</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
 
     </div>
   </aside>
@@ -545,9 +665,8 @@
 
 
   
-    <script src="/js/scrollspy.js?v=7.3.0"></script><script src="/js/post-details.js?v=7.3.0"></script>
+  <script src="/js/scrollspy.js?v=7.3.0"></script><script src="/js/post-details.js?v=7.3.0"></script>
 
-  
 
 
 <script>
