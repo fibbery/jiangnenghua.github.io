@@ -63,7 +63,7 @@
 <meta property="og:description" content="前言Rocketmq是一个阿里开源的一款消息中间件。官网介绍如下：  Apache RocketMQ is a distributed messaging and streaming platform with low latency, high performance and reliability, trillion-level capacity and flexible scalabilit">
 <meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="https://i.loli.net/2020/06/17/StF3ZNlLGrHARoB.png">
-<meta property="og:updated_time" content="2020-06-17T03:46:36.518Z">
+<meta property="og:updated_time" content="2020-06-17T03:50:14.961Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Rocketmq源码计划：系统架构分析">
 <meta name="twitter:description" content="前言Rocketmq是一个阿里开源的一款消息中间件。官网介绍如下：  Apache RocketMQ is a distributed messaging and streaming platform with low latency, high performance and reliability, trillion-level capacity and flexible scalabilit">
@@ -278,7 +278,7 @@
                 
               
 
-              <time title="创建时间：2020-06-17 11:43:27 / 修改时间：11:46:36" itemprop="dateCreated datePublished" datetime="2020-06-17T11:43:27+08:00">2020-06-17</time>
+              <time title="创建时间：2020-06-17 11:43:27 / 修改时间：11:50:14" itemprop="dateCreated datePublished" datetime="2020-06-17T11:43:27+08:00">2020-06-17</time>
             </span>
           
             
@@ -336,7 +336,7 @@
 <blockquote>
 <p>Apache RocketMQ is a distributed messaging and streaming platform with low latency, high performance and reliability, trillion-level capacity and flexible scalability. It consists of four parts: name servers, brokers, producers and consumers. Each of them can be horizontally extended without a single Point of Failure。</p>
 </blockquote>
-<p>该消息中间件有着低延迟、高性能、高可靠、亿级存储、弹性伸缩的特点。主要由四部分组成：name servers(服务发现和路由)、 brokers(消息存储和转发)、producers (消息生产者)、consumers(消息消费者)。<br>大致的架构图如下：</p>
+<p>该消息中间件有着低延迟、高性能、高可靠、亿级存储、弹性伸缩的特点。主要由四部分组成：name servers(服务发现和路由)、 brokers(消息存储和转发)、producers (消息生产者)、consumers(消息消费者)。<br><a id="more"></a><br>大致的架构图如下：</p>
 <p><img src="https://i.loli.net/2020/06/17/StF3ZNlLGrHARoB.png" alt="https://i.loli.net/2020/06/17/StF3ZNlLGrHARoB.png"></p>
 <p>接下来我们分部拆解以下各个模块的作用。</p>
 <h2 id="NameServer-Cluster"><a href="#NameServer-Cluster" class="headerlink" title="NameServer Cluster"></a>NameServer Cluster</h2><p>扮演路由信息存储和服务发现的角色。每个Broker启动的时候都会向集群中的所有NameServer进行注册，因此集群中每个NameServer都存储着全量路由信息。同时，每个NameServer直接是相互不通信的，处于隔离状态。所以严格意义上来说，NameServer Cluster是一个伪集群。</p>
