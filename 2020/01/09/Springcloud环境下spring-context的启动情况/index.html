@@ -54,21 +54,21 @@
   };
 </script>
 
-  <meta name="description" content="前言本来想在Spring容器中用ApplicationListener处理一下ContextRefreshedEvent事件，原先以为直接写一个ApplicationListener的即可，没想到执行的时候发现这个listener执行了两次事件更新，印象中一个容器只会发送一次类似的映像事件，怎么会执行三次的？接下来调试一下源码看看。">
+  <meta name="description" content="前言本来想在Spring容器中用ApplicationListener处理一下ContextRefreshedEvent事件，原先以为直接写一个ApplicationListener的即可，没想到执行的时候发现这个listener执行了两次事件更新，印象中一个容器只会发送一次类似的事件，怎么会执行三次的？接下来调试一下源码看看。">
 <meta name="keywords" content="java,spring">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Springcloud环境下spring context的启动情况">
 <meta property="og:url" content="https://fibbery.github.io/2020/01/09/Springcloud环境下spring-context的启动情况/index.html">
 <meta property="og:site_name" content="小笔记本">
-<meta property="og:description" content="前言本来想在Spring容器中用ApplicationListener处理一下ContextRefreshedEvent事件，原先以为直接写一个ApplicationListener的即可，没想到执行的时候发现这个listener执行了两次事件更新，印象中一个容器只会发送一次类似的映像事件，怎么会执行三次的？接下来调试一下源码看看。">
+<meta property="og:description" content="前言本来想在Spring容器中用ApplicationListener处理一下ContextRefreshedEvent事件，原先以为直接写一个ApplicationListener的即可，没想到执行的时候发现这个listener执行了两次事件更新，印象中一个容器只会发送一次类似的事件，怎么会执行三次的？接下来调试一下源码看看。">
 <meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="https://fibbery.github.io/assets/blogImg/EventFirstTrigger.jpg">
 <meta property="og:image" content="https://fibbery.github.io/assets/blogImg/EventSecondTrigger.jpg">
 <meta property="og:image" content="https://fibbery.github.io/assets/blogImg/EventThirdTrigger.jpg">
-<meta property="og:updated_time" content="2020-01-10T04:10:28.036Z">
+<meta property="og:updated_time" content="2020-04-08T06:44:44.942Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Springcloud环境下spring context的启动情况">
-<meta name="twitter:description" content="前言本来想在Spring容器中用ApplicationListener处理一下ContextRefreshedEvent事件，原先以为直接写一个ApplicationListener的即可，没想到执行的时候发现这个listener执行了两次事件更新，印象中一个容器只会发送一次类似的映像事件，怎么会执行三次的？接下来调试一下源码看看。">
+<meta name="twitter:description" content="前言本来想在Spring容器中用ApplicationListener处理一下ContextRefreshedEvent事件，原先以为直接写一个ApplicationListener的即可，没想到执行的时候发现这个listener执行了两次事件更新，印象中一个容器只会发送一次类似的事件，怎么会执行三次的？接下来调试一下源码看看。">
 <meta name="twitter:image" content="https://fibbery.github.io/assets/blogImg/EventFirstTrigger.jpg">
   <link rel="alternate" href="/disable" title="小笔记本" type="application/atom+xml">
   <link rel="canonical" href="https://fibbery.github.io/2020/01/09/Springcloud环境下spring-context的启动情况/">
@@ -291,7 +291,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-01-10 12:10:28" itemprop="dateModified" datetime="2020-01-10T12:10:28+08:00">2020-01-10</time>
+                <time title="修改时间：2020-04-08 14:44:44" itemprop="dateModified" datetime="2020-04-08T14:44:44+08:00">2020-04-08</time>
               </span>
             
           
@@ -342,7 +342,7 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>本来想在Spring容器中用ApplicationListener处理一下ContextRefreshedEvent事件，原先以为直接写一个ApplicationListener的即可，没想到执行的时候发现这个listener执行了两次事件更新，印象中一个容器只会发送一次类似的映像事件，怎么会执行三次的？<br>接下来调试一下源码看看。</p>
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>本来想在Spring容器中用ApplicationListener处理一下ContextRefreshedEvent事件，原先以为直接写一个ApplicationListener的即可，没想到执行的时候发现这个listener执行了两次事件更新，印象中一个容器只会发送一次类似的事件，怎么会执行三次的？<br>接下来调试一下源码看看。</p>
 <a id="more"></a>
 <h2 id="代码分析"><a href="#代码分析" class="headerlink" title="代码分析"></a>代码分析</h2><p>自己写了一个如下的listener, 监听ContextRefreshedEvent<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">DemoListener</span> <span class="keyword">implements</span> <span class="title">ApplicationListener</span>&lt;<span class="title">ContextRefreshedEvent</span>&gt;</span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> ApplicationContext context;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> AtomicInteger NUM = <span class="keyword">new</span> AtomicInteger(<span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onApplicationEvent</span><span class="params">(ContextRefreshedEvent event)</span> </span>&#123;</span><br><span class="line">        log.info(<span class="string">"listener has execute &#123;&#125; times!!!!"</span>, NUM.incrementAndGet());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
 <p></p>
@@ -402,6 +402,10 @@
 
             <div class="post-nav-prev post-nav-item">
               
+                <a href="/2020/06/17/Rocketmq源码计划：系统架构分析/" rel="prev" title="Rocketmq源码计划：系统架构分析">
+                  Rocketmq源码计划：系统架构分析 <i class="fa fa-chevron-right"></i>
+                </a>
+              
             </div>
           </div>
         
@@ -460,7 +464,7 @@
         
           <a href="/archives/">
         
-          <span class="site-state-item-count">13</span>
+          <span class="site-state-item-count">14</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -477,7 +481,9 @@
         
           
         
-        <span class="site-state-item-count">1</span>
+          
+        
+        <span class="site-state-item-count">2</span>
         <span class="site-state-item-name">分类</span>
         </a>
       </div>
@@ -524,7 +530,9 @@
         
           
         
-        <span class="site-state-item-count">16</span>
+          
+        
+        <span class="site-state-item-count">17</span>
         <span class="site-state-item-name">标签</span>
         </a>
       </div>

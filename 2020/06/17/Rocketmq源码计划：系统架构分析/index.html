@@ -54,20 +54,22 @@
   };
 </script>
 
-  <meta name="description" content="前提基于dubbo默认通讯服务器Netty来解析服务端和客户端如何通讯">
-<meta name="keywords" content="dubbo - netty - java">
+  <meta name="description" content="前言Rocketmq是一个阿里开源的一款消息中间件。官网介绍如下：  Apache RocketMQ is a distributed messaging and streaming platform with low latency, high performance and reliability, trillion-level capacity and flexible scalabilit">
+<meta name="keywords" content="java,rocketmq">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Dubbo通信实现">
-<meta property="og:url" content="https://fibbery.github.io/2018/03/03/Dubbo通信实现/index.html">
+<meta property="og:title" content="Rocketmq源码计划：系统架构分析">
+<meta property="og:url" content="https://fibbery.github.io/2020/06/17/Rocketmq源码计划：系统架构分析/index.html">
 <meta property="og:site_name" content="小笔记本">
-<meta property="og:description" content="前提基于dubbo默认通讯服务器Netty来解析服务端和客户端如何通讯">
+<meta property="og:description" content="前言Rocketmq是一个阿里开源的一款消息中间件。官网介绍如下：  Apache RocketMQ is a distributed messaging and streaming platform with low latency, high performance and reliability, trillion-level capacity and flexible scalabilit">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2019-08-20T10:06:14.663Z">
+<meta property="og:image" content="https://i.loli.net/2020/06/17/StF3ZNlLGrHARoB.png">
+<meta property="og:updated_time" content="2020-06-17T03:46:36.518Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Dubbo通信实现">
-<meta name="twitter:description" content="前提基于dubbo默认通讯服务器Netty来解析服务端和客户端如何通讯">
+<meta name="twitter:title" content="Rocketmq源码计划：系统架构分析">
+<meta name="twitter:description" content="前言Rocketmq是一个阿里开源的一款消息中间件。官网介绍如下：  Apache RocketMQ is a distributed messaging and streaming platform with low latency, high performance and reliability, trillion-level capacity and flexible scalabilit">
+<meta name="twitter:image" content="https://i.loli.net/2020/06/17/StF3ZNlLGrHARoB.png">
   <link rel="alternate" href="/disable" title="小笔记本" type="application/atom+xml">
-  <link rel="canonical" href="https://fibbery.github.io/2018/03/03/Dubbo通信实现/">
+  <link rel="canonical" href="https://fibbery.github.io/2020/06/17/Rocketmq源码计划：系统架构分析/">
 
 
 <script id="page-configurations">
@@ -81,7 +83,7 @@
   };
 </script>
 
-  <title>Dubbo通信实现 | 小笔记本</title>
+  <title>Rocketmq源码计划：系统架构分析 | 小笔记本</title>
   <meta name="generator" content="Hexo 3.4.4">
   
 
@@ -248,7 +250,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://fibbery.github.io/2018/03/03/Dubbo通信实现/">
+    <link itemprop="mainEntityOfPage" href="https://fibbery.github.io/2020/06/17/Rocketmq源码计划：系统架构分析/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Fibbery">
@@ -260,7 +262,7 @@
       <meta itemprop="name" content="小笔记本">
     </span>
       <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">Dubbo通信实现
+        <h1 class="post-title" itemprop="name headline">Rocketmq源码计划：系统架构分析
 
           
         </h1>
@@ -276,19 +278,11 @@
                 
               
 
-              <time title="创建时间：2018-03-03 21:28:03" itemprop="dateCreated datePublished" datetime="2018-03-03T21:28:03+08:00">2018-03-03</time>
+              <time title="创建时间：2020-06-17 11:43:27 / 修改时间：11:46:36" itemprop="dateCreated datePublished" datetime="2020-06-17T11:43:27+08:00">2020-06-17</time>
             </span>
           
             
 
-            
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2019-08-20 18:06:14" itemprop="dateModified" datetime="2019-08-20T18:06:14+08:00">2019-08-20</time>
-              </span>
             
           
             <span class="post-meta-item">
@@ -297,7 +291,7 @@
               </span>
               <span class="post-meta-item-text">分类于</span>
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/学习笔记/" itemprop="url" rel="index"><span itemprop="name">学习笔记</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/rocketmq源码分析/" itemprop="url" rel="index"><span itemprop="name">rocketmq源码分析</span></a></span>
 
                 
                 
@@ -324,7 +318,7 @@
       
       <span class="post-meta-item-text">Valine：</span>
     
-    <a title="valine" href="/2018/03/03/Dubbo通信实现/#comments" itemprop="discussionUrl"><span class="post-comments-count valine-comment-count" data-xid="/2018/03/03/Dubbo通信实现/" itemprop="commentCount"></span></a>
+    <a title="valine" href="/2020/06/17/Rocketmq源码计划：系统架构分析/#comments" itemprop="discussionUrl"><span class="post-comments-count valine-comment-count" data-xid="/2020/06/17/Rocketmq源码计划：系统架构分析/" itemprop="commentCount"></span></a>
   </span>
   
   
@@ -338,33 +332,30 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h2 id="前提"><a href="#前提" class="headerlink" title="前提"></a>前提</h2><p>基于dubbo默认通讯服务器Netty来解析服务端和客户端如何通讯<br><a id="more"></a></p>
-<h2 id="具体实现"><a href="#具体实现" class="headerlink" title="具体实现"></a>具体实现</h2><h3 id="暴露服务"><a href="#暴露服务" class="headerlink" title="暴露服务"></a>暴露服务</h3><p>首先我们看下协议接口类Protocol中暴露服务的方法</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 暴露远程调用服务：</span></span><br><span class="line"><span class="comment"> * 1. 该通信协议必须在接到请求之后记录请求的源地址：</span></span><br><span class="line"><span class="comment"> *		RpcContext.getContext().setRemoteAddress()</span></span><br><span class="line"><span class="comment"> * 2. export必须是幂等的。意味着使用相同的URL不论是调用一次还是调用两次，结果都是一样的</span></span><br><span class="line"><span class="comment"> * 3. invoker实例是由框架实现的，跟协议没任何关系</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> T 服务的类型</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> invoker 服务实现的实例</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@return</span> 返回被暴露服务实例的引用，用于取消服务</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@Adaptive</span></span><br><span class="line">&lt;T&gt; <span class="function">Exporter&lt;T&gt; <span class="title">export</span><span class="params">(Invoker&lt;T&gt; invoker)</span> <span class="keyword">throws</span> RpcException</span>;</span><br></pre></td></tr></table></figure>
-<p>然后我们看分析dubbo协议的暴露服务的具体实现DubboProtocol.export的过程如下</p>
-<figure class="highlight xl"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="title">export</span> ---&gt;</span> <span class="function"><span class="title">openServer</span> ---&gt;</span> <span class="function"><span class="title">createServer</span> ---&gt;</span>  Exchangers.bind(url,handler)</span><br></pre></td></tr></table></figure>
-<p>openServer根据invoker携带的URL信息获取host以及ip，如果已经存在，则不会创建服务。<br>然后我们继续看下<em>Exchanger</em>的实现</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> ExchangeServer <span class="title">bind</span><span class="params">(URL url, ExchangeHandler handler)</span> <span class="keyword">throws</span> RemotingException </span>&#123;</span><br><span class="line">       <span class="keyword">if</span> (url == <span class="keyword">null</span>) &#123;</span><br><span class="line">           <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(<span class="string">"url == null"</span>);</span><br><span class="line">       &#125;</span><br><span class="line">       <span class="keyword">if</span> (handler == <span class="keyword">null</span>) &#123;</span><br><span class="line">           <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(<span class="string">"handler == null"</span>);</span><br><span class="line">       &#125;</span><br><span class="line">       url = url.addParameterIfAbsent(Constants.CODEC_KEY, <span class="string">"exchange"</span>);</span><br><span class="line">       <span class="keyword">return</span> getExchanger(url).bind(url, handler);</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
-<p><em>getExchanger(url)</em>典型的策略模式，得到HeaderExchanger，代码如下</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> ExchangeServer <span class="title">bind</span><span class="params">(URL url, ExchangeHandler handler)</span> <span class="keyword">throws</span> RemotingException </span>&#123;</span><br><span class="line">       <span class="keyword">return</span> <span class="keyword">new</span> HeaderExchangeServer(Transporters.bind(url, <span class="keyword">new</span> DecodeHandler(<span class="keyword">new</span> HeaderExchangeHandler(handler))));</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>Rocketmq是一个阿里开源的一款消息中间件。官网介绍如下：</p>
+<blockquote>
+<p>Apache RocketMQ is a distributed messaging and streaming platform with low latency, high performance and reliability, trillion-level capacity and flexible scalability. It consists of four parts: name servers, brokers, producers and consumers. Each of them can be horizontally extended without a single Point of Failure。</p>
+</blockquote>
+<p>该消息中间件有着低延迟、高性能、高可靠、亿级存储、弹性伸缩的特点。主要由四部分组成：name servers(服务发现和路由)、 brokers(消息存储和转发)、producers (消息生产者)、consumers(消息消费者)。<br>大致的架构图如下：</p>
+<p><img src="https://i.loli.net/2020/06/17/StF3ZNlLGrHARoB.png" alt="https://i.loli.net/2020/06/17/StF3ZNlLGrHARoB.png"></p>
+<p>接下来我们分部拆解以下各个模块的作用。</p>
+<h2 id="NameServer-Cluster"><a href="#NameServer-Cluster" class="headerlink" title="NameServer Cluster"></a>NameServer Cluster</h2><p>扮演路由信息存储和服务发现的角色。每个Broker启动的时候都会向集群中的所有NameServer进行注册，因此集群中每个NameServer都存储着全量路由信息。同时，每个NameServer直接是相互不通信的，处于隔离状态。所以严格意义上来说，NameServer Cluster是一个伪集群。</p>
+<h2 id="Broker-Cluster"><a href="#Broker-Cluster" class="headerlink" title="Broker Cluster"></a>Broker Cluster</h2><p>扮演消息储存和消息转发的角色。通过轻量级的Topic和Queue来提供消息存储，支持消息推拉模型。单个Broker节点都会和所有的NameServer保持长连接，定时同步Topic信息。</p>
+<h2 id="Producer-Cluster"><a href="#Producer-Cluster" class="headerlink" title="Producer Cluster"></a>Producer Cluster</h2><p>扮演消息发送的角色。支持分布式部署。消息由生产者通过各种负载均衡策略发送到Broker。发送过程延时低，并且支持快速失败。</p>
+<p>Rocketmq提供了三种消息发送模式：</p>
 <ol>
-<li><em>HeaderExchangeServer</em>其实是真正server的包裹类，提供了server的一些操作接口已经对server的一个心跳检测功能。</li>
-<li>Transporters.bind这一步就是根据url选择对应的通信框架开启服务(此例中采用NettyTransport)。</li>
-<li>new DecodeHandler(new HeaderExchangeHandler(handler)))采用装饰器模式构造服务端通道的handler</li>
+<li>同步发送：发送消息后需要等broker回复才能执行接下来的流程，适用于消息比较重要的流程</li>
+<li>异步发送：发送消息后的时候可以不用等待broker回复而执行接下来的流程，可以通过注册异步回调来处理后续流程。适用于对发送时间比较敏感但是消息又比较重要的业务。</li>
+<li>单向发送：发送消息后不等broker回复就可以执行接下来的流程，并且无回调函数处理。适用于对消息可靠性不是很高的业务。</li>
 </ol>
-<blockquote>
-<p>此处不讨论DecodeHandler如何对该协议通道的信息decode以及encode的过程</p>
-</blockquote>
-<h3 id="引用服务"><a href="#引用服务" class="headerlink" title="引用服务"></a>引用服务</h3><p>我们看下Protocol中引用服务的方法</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">   <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 引用远程服务</span></span><br><span class="line"><span class="comment">     * 1.当使用者调用invoker(通信协议使用refer方法生成)的invoke方法的时候，通信协议</span></span><br><span class="line"><span class="comment">     * 会相应的让服务端对应的invoker调用invoke方法。</span></span><br><span class="line"><span class="comment">     * 2.refer返回的invoker实例是由通信协议生成实现的。实现的过程只不过是将方法调用的过程</span></span><br><span class="line"><span class="comment">     * 封装成用远程请求的方式。</span></span><br><span class="line"><span class="comment">     * 3.当URL设置check=false的时候，客户端不应该在连接服务端失败的时候抛出异常，并且有</span></span><br><span class="line"><span class="comment">     * 义务尝试重连</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> &lt;T&gt; 远程服务的类型</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> type 远程服务类的class</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> url 远程服务的url</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span> invoker 远程服务的本地代理实现</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line"><span class="meta">@Adaptive</span></span><br><span class="line">&lt;T&gt; <span class="function">Invoker&lt;T&gt; <span class="title">refer</span><span class="params">(Class&lt;T&gt; type, URL url)</span> <span class="keyword">throws</span> RpcException</span>;</span><br></pre></td></tr></table></figure>
-<p>我们还是通过DubboProtocol来看客户端如何实现远程调用，refer方法在初始的时候会初始化一个与对应远端的连接，同时返回持有这个连接的对象invoker。我们需要将其转换成对应需要使用的服务类，在这里就需要用到动态代理这样的一个方式来生成一个本地句柄，以便客户端像调用本地服务一样调用。所以，一般客户端使用如下(伪码)：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ProxyFactory proxyFactory = ExtensionLoader.getExtensionLoader(ProxyFactory.class).getAdaptiveExtension();</span><br><span class="line">DemoService service = proxyFactory.getProxy(refer(type,url)); <span class="comment">//本地生成代理类</span></span><br><span class="line">service.echo(); <span class="comment">//调用方法</span></span><br></pre></td></tr></table></figure>
-<p>接下来我们具体看JavassistProxyFactory是怎么生成一个客户端需要的代理类的，代码如下：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> &lt;T&gt; <span class="function">T <span class="title">getProxy</span><span class="params">(Invoker&lt;T&gt; invoker, Class&lt;?&gt;[] interfaces)</span> </span>&#123;</span><br><span class="line">     <span class="keyword">return</span> (T) Proxy.getProxy(interfaces).newInstance(<span class="keyword">new</span> InvokerInvocationHandler(invoker));</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
-<p>InvokerInvocationHandler这个类是很明显的装饰器模式，让属于Object类中的方法以及toString、hashCode、equals一些通用方法只在本地调用，实际上我们还是使用的DubboInvoker的invoker方法，也就是其中具体的doInvoke方法。代码点实现也只是使用返回的invoker对象中持有的客户端连接来发送请求消息，获取返回结果。</p>
-<blockquote>
-<p>dubbo暴露方法和对远程方法的调用可以阅读源码DubboProtocolTest.testDemoProtocol来了解</p>
-</blockquote>
+<h2 id="Consumer-Cluster"><a href="#Consumer-Cluster" class="headerlink" title="Consumer Cluster"></a>Consumer Cluster</h2><p>扮演消费消息的角色。支持集群消费和广播消费：集群消费表示同一个集群下，订阅的topic里的一条信息只能够被消费一次；广播消费表示同一个集群下，订阅的topic里的一条消息能够被所有的消费者消费。同时，支持的消息消费模式也有两种： Pull 和 Push模式。</p>
+<p><em>Pull Consumer</em> 拉取型的消费者。消费者主动从Broker拉取需要消费的消息。</p>
+<p><em>Push Consumer</em> 推送型的消费者。Broker主动推送消息到Consumer端。实际实现是把轮询过程封装了，在启动初期会在重新负载之后发送一次拉取消息的请求，然后注册对应请求的监听。broker端收到这类请求之后先存起来，内部会有一个轮询进程看有没有新消息进来，如果有，那么从存储的请求信息中挑选对应的进行回复操作，到达cosumer之后触发对应的监听器进行消息消费。</p>
+<p>以上就是Rocketmq现有架构几个模块的功能简单的分析。理清楚架构中各自的角色和作用有利于我们对使用Rocketmq过程中出现的问题快速定位。同时，Rocketmq源码也是按照上面几个部分切割的，有利于我们分步理解源码实现。</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
+<li><a href="https://rocketmq.apache.org/docs/rmq-arc/" target="_blank" rel="noopener">RocketMQ Architecture</a></li>
+<li><a href="https://juejin.im/post/5de3c8026fb9a07194761641#heading-9" target="_blank" rel="noopener">《浅入浅出》-RocketMQ</a></li>
+</ol>
 
     </div>
 
@@ -380,7 +371,9 @@
           
           <div class="post-tags">
             
-              <a href="/tags/dubbo-netty-java/" rel="tag"># dubbo - netty - java</a>
+              <a href="/tags/java/" rel="tag"># java</a>
+            
+              <a href="/tags/rocketmq/" rel="tag"># rocketmq</a>
             
           </div>
         
@@ -390,8 +383,8 @@
           <div class="post-nav">
             <div class="post-nav-next post-nav-item">
               
-                <a href="/2018/02/06/OpenSSL生成根证书CA/" rel="next" title="OpenSSL生成根证书CA">
-                  <i class="fa fa-chevron-left"></i> OpenSSL生成根证书CA
+                <a href="/2020/01/09/Springcloud环境下spring-context的启动情况/" rel="next" title="Springcloud环境下spring context的启动情况">
+                  <i class="fa fa-chevron-left"></i> Springcloud环境下spring context的启动情况
                 </a>
               
             </div>
@@ -399,10 +392,6 @@
             <span class="post-nav-divider"></span>
 
             <div class="post-nav-prev post-nav-item">
-              
-                <a href="/2018/03/06/Java序列化的一些了解/" rel="prev" title="Java序列化的一些了解">
-                  Java序列化的一些了解 <i class="fa fa-chevron-right"></i>
-                </a>
               
             </div>
           </div>
@@ -570,7 +559,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前提"><span class="nav-number">1.</span> <span class="nav-text">前提</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#具体实现"><span class="nav-number">2.</span> <span class="nav-text">具体实现</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#暴露服务"><span class="nav-number">2.1.</span> <span class="nav-text">暴露服务</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#引用服务"><span class="nav-number">2.2.</span> <span class="nav-text">引用服务</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#NameServer-Cluster"><span class="nav-number">2.</span> <span class="nav-text">NameServer Cluster</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Broker-Cluster"><span class="nav-number">3.</span> <span class="nav-text">Broker Cluster</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Producer-Cluster"><span class="nav-number">4.</span> <span class="nav-text">Producer Cluster</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Consumer-Cluster"><span class="nav-number">5.</span> <span class="nav-text">Consumer Cluster</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考"><span class="nav-number">6.</span> <span class="nav-text">参考</span></a></li></ol></div>
             
 
           </div>
